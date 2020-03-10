@@ -1,0 +1,78 @@
+---
+title: "Aula 1"
+author: "Beatriz Milz"
+date: "10/03/2020"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+Exercícios da aula do dia 06/03/2020 -  [Link](https://jonnyphillips.github.io/Ciencia_de_Dados/introducao.html). 
+
+```{r}
+# Instalar o pacote nycflights13
+
+# install.packages("nycflights13")
+
+# Carregar o pacote instalado
+library("nycflights13")
+
+# Carregar o pacote tidyverse
+
+library("tidyverse")
+```
+
+
+```{r}
+# Abrir o dataframe flights
+
+flights <- flights
+head(flights)
+
+
+```
+
+
+
+
+__Quantas observações existem no banco de dados?__ `r nrow(flights)` observações.
+
+
+__Quantas variáveis existem no banco de dados?__ `r ncol(flights)` variáveis.
+
+
+__O que representa cada observação no banco de dados?__ Cada observação representa um vôo realizado.
+
+
+__Quais variáveis existem nos dados?__
+
+```{r}
+colnames(flights)
+```
+
+__Qual ‘tipo’ de dado contém cada variável?__
+
+```{r}
+str(flights)
+```
+
+
+----
+```{r}
+siglas_aeroportos <- c("NWR", "JFK", "LGA")
+nomes_aeroportos <- c("Newark", "John F Kennedy", "Laguardia")
+
+
+tabela_aeroportos <- tibble(sigla = siglas_aeroportos,
+                            nome = nomes_aeroportos)
+
+```
+```{r}
+tabela_aeroportos
+```
+```{r eval=FALSE, include=TRUE}
+# exercícios no arquivo:
+rstudioapi::navigateToFile("1_introducao_exercicios.Rmd")
+```
+

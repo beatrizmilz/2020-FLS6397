@@ -1,0 +1,228 @@
+---
+title: "Exercícios aula 1"
+author: "Beatriz Milz"
+date: "10/03/2020"
+output:
+  word_document: default
+  html_document: 
+    df_print: paged
+---
+
+Exercícios da aula do dia 06/03/2020 -  [Link](https://jonnyphillips.github.io/Ciencia_de_Dados/introducao.html). 
+
+## Exercício 1
+
+### 1) Comece um novo script de Rmarkdown e accesse o banco de dados gapminder no pacote dslabs. Estes dados descrevem as estatísticas resumidas para países do mundo desde 1960.
+
+```{r}
+# Carregar a biblioteca gapminder
+library(gapminder)
+```
+
+
+### 2) Produza um mini-relatório com algumas frases curtas em HTML que descreva o banco de dados gapminder:
+
+- Número de observações
+
+- Número e nomes das variáveis
+
+- O tipo de cada variável
+
+- O que representa cada observação no banco de dados?
+
+
+O banco de dados `gapminder` possui `r nrow(gapminder)` observações e `r ncol(gapminder)` variáveis. As variáveis que estão disponíveis neste dataframe são: `r colnames(gapminder)`.
+
+- A variável `r colnames(gapminder)[1]` é do tipo `r class(gapminder$country)` e representa o país de qual aquela observação se refere.
+
+- A variável `r colnames(gapminder)[2]` é do tipo `r class(gapminder$continent)` e representa o continente onde está o país de qual aquela observação se refere.
+
+- A variável `r colnames(gapminder)[3]` é do tipo `r class(gapminder$year)` e representa o ano de qual aquela observação se refere.
+
+- A variável `r colnames(gapminder)[4]` é do tipo `r class(gapminder$lifeExp)` e representa a expectativa de vida no país a qual aquela observação se refere.
+
+- A variável `r colnames(gapminder)[5]` é do tipo `r class(gapminder$pop)` e representa a população no país a qual aquela observação se refere.
+
+- A variável `r colnames(gapminder)[6]` é do tipo `r class(gapminder$gdpPercap)` e representa o PIB per capita no país a qual aquela observação se refere.
+
+
+
+### 3) Verifique que as respostas 2(a) e 2(b) são calculadas automaticamente no relatório usando funções do R e in-line code para inserir as respostas numa frase.
+
+Sim, resposta no exercício 2.
+
+
+### 4) Calcule o valor do número de observações multiplicado pelo número de colunas.
+
+```{r}
+# Multiplica número de colunas pelo número de linhas
+ncol(gapminder) * nrow(gapminder)
+```
+
+
+### 5) Inclua uma tabela do banco de dados gapminder no relatório.
+
+```{r}
+# Incluir uma tabela Do dataframe gapminder
+
+gapminder
+```
+
+
+### 6) Verifique que o seu relatório tem título, autor e data corretos, e comentários suficientes para explicar o que faça cada linha de código.
+
+OK!
+
+
+### 7) Tente compilar o seu script final para um documento de Word.
+
+OK!
+
+
+## 
+
+
+## Exercício 3: Encontre o erro em todos os códigos abaixo:
+
+```{r}
+library("nycflights13")
+library("tidyverse")
+```
+
+Q1)
+
+dim**[**flights**]**
+
+```{r}
+dim(flights)
+```
+
+Q2)
+
+di**n**(flights)
+```{r}
+dim(flights)
+```
+
+Q3)
+
+v1 <- ("pato", "cachorro", "minhoca", "lagarto")
+
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v1
+```
+
+
+Q4)
+
+v**2** <- c("1", "2", "3", "4")
+
+v1 + 42
+
+```{r}
+v2 <- c(1, 2, 3, 4)
+v2 + 42
+```
+
+
+
+Q5)
+
+v1 <- c("pato", "cachorro", "minhoca", "lagarto"
+
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v1
+```
+
+
+Q6)
+
+v3 <- c(33 31 40 25 27 40)
+
+```{r}
+v3 <- c(33, 31, 40, 25, 27, 40)
+v3
+```
+
+
+
+Q7)
+
+v1 <- c(pato, cachorro, minhoca, lagarto)
+
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v1
+```
+
+
+Q8)
+
+v1 <- c("pato" "cachorro" "minhoca" "lagarto")
+
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v1
+```
+
+
+Q9)
+
+v3 <- **C**(33, 31, 40, 25, 27, 40)
+```{r}
+v3 <- c(33, 31, 40, 25, 27, 40)
+v3
+```
+
+
+Q10)
+
+v1 <- c("pato", "cachorro"**"**, "minhoca", "lagarto")
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+
+v1
+```
+
+
+Q11)
+
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+
+v4 <- c(33, 31, 40, 25, 27, 40)
+
+myData <- tibble(v1, v4)
+
+
+```{r}
+
+# v1 e v4 precisam ter o mesmo comprimento
+
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v4 <- c(33, 31, 40, 25)
+myData <- tibble(v1, v4)
+myData
+
+```
+
+
+
+Q12)
+
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+
+v4 <- c(33, 31, 40, 25)
+
+myData <- tibble(v1 = animal, v4 = idade)
+
+
+```{r}
+v1 <- c("pato", "cachorro", "minhoca", "lagarto")
+v4 <- c(33, 31, 40, 25)
+myData <- tibble(animal = v1, idade = v4)
+
+myData
+```
+
