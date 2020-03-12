@@ -1,0 +1,128 @@
+---
+title: "<center><img src= 'img/allisonhorst/community1.jpg' width = '45%' alt='Author: Allison Horst'></br><p>Imagem por <a href='https://twitter.com/allison_horst' target=_blank>@allison_horst</a></p></center> "
+subtitle: "R-Ladies São Paulo"
+author: "Março/2020"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, "css/metropolis.css", "css/metropolis-fonts.css", "css/footer.css"]
+    includes:
+      after_body: insert-logo.html
+# Para exportar em PDF: pagedown::chrome_print("docs/index.html")
+knit: pagedown::chrome_print
+---
+layout: true
+  
+<div class="my-footer"><span>
+
+<a href="https://www.meetup.com/pt-BR/R-Ladies-Sao-Paulo">Meetup</a> |
+<a href="https://twitter.com/RLadiesSaoPaulo">Twitter</a> | 
+<a href="http://instagram.com/RLadiesSaoPaulo">Instagram</a> |
+<a href="http://facebook.com/RLadiesSaoPaulo">Facebook</a> |
+<a href="https://github.com/rladies/meetup-presentations_sao-paulo">GitHub</a> 
+
+</span></div> 
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", message=FALSE, warning=FALSE)
+
+```
+
+
+
+---
+class:  
+
+# O que é o R-Ladies?
+
+R-Ladies é uma organização mundial cuja missão é promover a diversidade de gênero na comunidade da linguagem R.
+
+R-Ladies São Paulo integra, orgulhosamente, a organização R-Ladies Global, em São Paulo.
+
+## Como?
+
+Através de meetups e mentorias em um ambiente seguro e amigável.
+
+Nosso principal objetivo é promover a linguagem computacional estatística R compartilhando conhecimento, assim, quem tiver interesse na linguagem será bem-vinda, independente do nível de conhecimento. 
+
+
+Fonte: [About us - R-Ladies](https://rladies.org/about-us/), [Meetup R-Ladies São Paulo](https://www.meetup.com/R-Ladies-Sao-Paulo/)
+
+---
+class:   
+
+# Para quem?
+
+Nosso principal público-alvo são as pessoas que se identificam com gêneros sub-representados na comunidade R, portanto: mulheres cis, mulheres trans, homens trans, pessoas não-binárias e queer.
+
+## Missão
+
+Como uma iniciativa de diversidade, a missão das R-Ladies é alcançar uma representação proporcional de pessoas de gêneros atualmente sub-representados na comunidade R, incentivando, inspirando e capacitando-as.
+
+
+## Código de conduta
+
+O R-Ladies dedica-se a proporcionar uma experiência livre de assédio para todas as pessoas partcicipantes, desta forma, não é tolerada nenhuma forma de assédio. [Código de conduta - R-Ladies](https://github.com/rladies/starter-kit/wiki/Code-of-Conduct#portuguese)
+
+
+
+Fonte: [About us - R-Ladies](https://rladies.org/about-us/), [Meetup R-Ladies São Paulo](https://www.meetup.com/R-Ladies-Sao-Paulo/)
+
+---
+class:
+
+# R-Ladies - Capítulos no mundo
+
+<br>
+<br>
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("img/rladies-mundo.JPG")
+```
+
+Atualizado em: Março/2019. Fonte: [R Community Explorer](https://benubah.github.io/r-community-explorer/rladies.html) 
+
+
+---
+class: 
+
+# R-Ladies em São Paulo
+
+```{r out.width="65%"}
+knitr::include_graphics("img/1meetupsp.jpeg")
+```
+
+
+- **Primeiro encontro R-Ladies São Paulo ** - Agosto/2018
+
+- **+ 860 membros** - Março/2020 
+
+
+---
+class:
+
+# Saiba mais sobre a R-Ladies
+.pull-left[
+
+- [Website RLadies Global](https://rladies.org/)
+- Twitter: [@RLadiesGlobal](https://twitter.com/rladiesglobal), [@RLadiesSaoPaulo](https://twitter.com/RLadiesSaoPaulo)
+- [Instagram](http://instagram.com/RLadiesSaoPaulo)
+- [Facebook](http://facebook.com/RLadiesSaoPaulo)
+- [Meetup](https://www.meetup.com/pt-BR/R-Ladies-Sao-Paulo)
+- [GitHub](https://github.com/rladies/meetup-presentations_sao-paulo)
+- Não tem capítulo na sua cidade e quer iniciar um?  Saiba como em <a href="https://rladies.org/about-us/help/"> R-Ladies - How do get involved </a>
+
+
+.footnote[Apresentação feita por [Beatriz Milz](https://beatrizmilz.com) com o pacote [xaringan](https://github.com/yihui/xaringan), com o tema `metropolis` modificado.]
+
+
+]
+
+
+
+.pull-right[
+```{r }
+knitr::include_graphics("img/allisonhorst/principio_agora_pt.png")
+```
+]

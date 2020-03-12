@@ -8,6 +8,6 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     - :white_check_mark: R 4 Data Science - Capítulo 2
     - :white_check_mark: R 4 Data Science - Capítulo 4
     - R 4 Data Science - Capítulo 5
-    - R 4 Data Science - Capítulo 9
+    - :white_check_mark: R 4 Data Science - Capítulo 9
     - R 4 Data Science - Capítulo 10 
     - R 4 Data Science - Capítulo 11
