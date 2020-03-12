@@ -1,5 +1,5 @@
 ---
-title: "<center><img src= 'img/allisonhorst/community1.jpg' width = '45%' alt='Author: Allison Horst'></br><p>Imagem por <a href='https://twitter.com/allison_horst' target=_blank>@allison_horst</a></p></center> "
+title: "<center><img src= 'img/allisonhorst/community1.jpg' width = '45%' alt='Author: Allison Horst'></br><p>Ilustração por <a href='https://twitter.com/allison_horst' target=_blank>@allison_horst</a></p></center> "
 subtitle: "R-Ladies São Paulo"
 author: "Março/2020"
 output:
@@ -122,7 +122,7 @@ class:
 
 
 .pull-right[
-```{r }
+```{r fig.cap="Ilustração por <a href='https://twitter.com/allison_horst' target=_blank>@allison_horst</a> "}
 knitr::include_graphics("img/allisonhorst/principio_agora_pt.png")
 ```
 ]
