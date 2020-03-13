@@ -16,7 +16,7 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     
 - [Aula 2](https://jonnyphillips.github.io/Ciencia_de_Dados/abrindo_manipulando.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2.html)
-  - [ ]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2_exercicios.html)
+  - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2_exercicios.html)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 12
     - [ ]  Capítulo 15 
