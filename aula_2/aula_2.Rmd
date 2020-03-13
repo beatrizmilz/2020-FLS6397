@@ -1,0 +1,332 @@
+---
+title: "Aula 2 - Abrindo e Manipulando Dados"
+author: "Beatriz Milz"
+date: "13/03/2020"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+- Carregar as bibliotecas que utilizaremos:
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+# Manipulando Dados
+
+## 1. Renomear Variáveis (Rename)
+
+Quais são os nomes das variáveis?
+
+```{r}
+names(flights)
+```
+
+Renomear a variável arr_time
+
+```{r}
+flights %>% rename(arrival_time = arr_time)
+
+
+flights
+
+
+flights_renomeado <- flights %>% rename(arrival_time = arr_time) 
+
+flights_renomeado
+```
+
+```{r}
+flights2 <- flights %>% rename(arrival_time = arr_time) %>% 
+  rename(departure_time = dep_time)
+
+flights
+```
+
+
+```{r}
+flights3 <- flights %>% rename(arrival_time = arr_time,
+                              departure_time = dep_time)
+
+flights3
+```
+
+
+## 2. Selecionar Variáveis (Select)
+
+```{r}
+flights %>% select(year, month, day)
+```
+
+
+```{r}
+flights4 <- flights %>% select(year, month, day)
+flights4
+```
+
+## 3. Transformar Variáveis (Mutate)
+
+```{r}
+flights5 <- flights %>%  mutate(dep_delay_dobro = dep_delay*2)
+
+flights5
+```
+
+
+```{r}
+flights %>%  mutate(calculo_metade_diferenca = (arr_time - dep_time)/2 )
+```
+
+
+```{r}
+flights %>% mutate(dep_delay = dep_delay * 60)
+```
+
+
+```{r}
+flights %>% mutate(origin = tolower(origin))
+```
+
+## 4. Cortar/selecionar Observações (Slice)
+
+```{r}
+flights %>%  slice(5)
+
+flights %>%  slice(1:5)
+```
+
+
+```{r}
+linhas_desejadas <- c(1, 4, 5, 6, 22, 169)
+
+
+flights %>% slice(linhas_desejadas)
+```
+
+```{r}
+flights %>% slice(-1)
+```
+
+```{r}
+flights %>% slice(10:20)
+```
+
+```{r}
+flights %>% slice(seq(from = 1, to = 100, by = 10))
+
+
+seq(from = 1, to = 100, by = 10)
+
+
+flights %>% slice(seq(1, 100, 10))
+
+# ?seq
+```
+
+## 5. Filtrar Observações (Filter)
+
+```{r}
+flights_junho <- flights %>% filter(month == 6)
+
+
+flights_junho
+```
+
+
+```{r}
+42 == 41 # FALSE
+42 != 41 # TRUE
+(2 + 2) == (3 + 1) # TRUE
+(2 + 2) != (3 + 1) # FALSE 
+5 > 3  # TRUE
+5 < 3   # FALSE 
+42 > 42 # FALSE
+42 < 41  # FALSE
+42 >= 42 # TRUE
+42 <= 41 # FALSE
+```
+
+```{r}
+"texto" == "texto" # TRUE
+"texto" == "texTo" # FALSE
+"texto" != "texto" # FALSE
+```
+
+```{r}
+"a" > "b" # FALSE
+"a" < "b" # TRUE
+"A" < "b" # TRUE
+"A" > "a" # TRUE - Surpresa - o maiúsculo é considerado maior que a mesma letra minúscula
+```
+
+```{r}
+TRUE == 1 # TRUE 
+FALSE == 0 # TRUE
+TRUE > FALSE # TRUE
+```
+
+```{r}
+x <- 5
+y <- 10
+x > y   #FALSE
+```
+
+```{r}
+flights %>%  filter(month == 6 & day == 5)
+```
+
+```{r}
+flights %>% filter(month == 6 & day == 5 & dep_time < 1200)
+```
+
+```{r}
+flights %>%  filter((dep_time <= 500 |
+                       dest == "ATL") & arr_delay >= 50)
+```
+
+
+```{r}
+flights %>%  filter(dep_time <= 500 |
+                       dest == "ATL"
+                    & arr_delay >= 50)
+```
+
+```{r}
+flights %>%  filter(!((dep_time <= 500 |
+                       dest == "ATL") & arr_delay >= 50))
+                    
+```
+
+
+## Combinando Manipulações
+
+```{r}
+flights %>% 
+  rename(arrival_time = arr_time) %>% 
+  mutate(dep_delay = dep_delay * 60) %>% 
+  filter(month == 6 & day == 5) %>% 
+  select(year, month, day, arrival_time, dep_delay) 
+```
+
+
+## Exercício 1: Manipulando dados
+
+```{r eval=FALSE, include=TRUE}
+rstudioapi::navigateToFile("aula_2_exercicios.Rmd")
+
+```
+
+
+
+# Abrindo Dados
+
+## Dados em arquivos textuais (.csv, .tsv, .txt)
+
+```{r}
+file1 <- "https://raw.githubusercontent.com/leobarone/ifch_intro_r/master/data/bf_amostra_hv.csv"
+dados <- read_csv(file1)
+```
+
+
+```{r}
+dados <- read_delim(file1,
+                    delim = ",")
+
+file_semi_colon <-
+  "https://raw.githubusercontent.com/leobarone/ifch_intro_r/master/data/bf_amostra_hp.csv"
+dados <- read_delim(file_semi_colon,
+                    delim = ";")
+
+file_tab <-
+  "https://raw.githubusercontent.com/leobarone/ifch_intro_r/master/data/bf_amostra_ht.csv"
+dados <- read_delim(file_tab,
+                    delim = "\t")
+
+
+file_sem_header <-
+  "https://raw.githubusercontent.com/leobarone/ifch_intro_r/master/data/bf_amostra_nv.csv"
+
+dados <- read_delim(file_sem_header,
+                    col_names = F,
+                    delim = ",")
+
+
+dados <- read_delim(
+  file_sem_header,
+  col_names = c(
+    "estado",
+    "municipio_cod",
+    "municipio_nome",
+    "NIS",
+    "transferido"
+  ),
+  delim = ","
+)
+
+dados <- read_delim(file1,
+                    delim = ",",
+                    col_types = "cicid")
+
+
+dados <- read_csv(file1)
+
+
+
+
+dados <- read_delim(file1,
+                    delim = ",",
+                    locale = locale(decimal_mark = ",", grouping_mark =
+                                      "."))
+
+dados <- read_delim(file1,
+                    delim = ",",
+                    locale = locale(encoding = 'latin1'))
+
+```
+
+
+## Dados em arquivos de Excel
+
+```{r}
+library("readxl")
+```
+
+```{r}
+library(readxl)
+url <- "ftp://ftp.ibge.gov.br/Perfil_Municipios/2005/base_MUNIC_2005.zip"
+destfile <- "dados/base_MUNIC_2005.zip"
+curl::curl_download(url, destfile)
+utils::unzip(destfile)
+
+excel_sheets("dados/Base 2005.xls")
+
+externas <- read_excel("dados/Base 2005.xls", "Variáveis externas")
+
+externas <- read_excel("dados/Base 2005.xls", 11)
+
+head(externas)
+```
+
+
+
+## Dados de SPSS, Stata e SAS
+
+```{r}
+library("haven")
+
+latino_barometro_spss <- read_spss("dados/F00004529-Latinobarometro_2015_sav/Latinobarometro_2015_Eng.sav")
+
+
+latino_barometro_stata <- read_stata("dados/F00004530-Latinobarometro_2015_dta/Latinobarometro_2015_Eng.dta")
+```
+
+
+
+

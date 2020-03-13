@@ -1,0 +1,131 @@
+---
+title: "Aula 2 - Exercícios"
+author: "Beatriz Milz"
+date: "13/03/2020"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(#echo=FALSE, 
+  error=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+## Exercício 1: Manipulando dados
+
+
+Com essas novas habilidades, vamos preparar uma análise rápida do banco de dados flights com o objetivo de produzir um relatório em html no final. Gere uma tabela apropriada para cada critério:
+
+- Os voos de United (carrier UA) que decolaram no dia 25 de janeiro.
+
+```{r}
+flights %>% filter(day == 25, month == 1, carrier == "UA")
+```
+
+
+- Os voos de JetBlue (carrier B6) que decolaram com mais de 300 minutos de atraso de Newark (origin EWR).
+
+```{r}
+flights %>% filter(carrier == "B6", origin == "EWR", dep_delay > 300)
+```
+
+
+- Calcule a velocidade dos voos que decolaram de LaGuardia (origin LGA) no dia 7 de setembro antes das 6h. Lembre-se que velocidade é distância dividido por tempo. (Qual é a unidade desta velocidade?)
+
+```{r}
+
+# ?nycflights13::flights
+
+# distance é em miles
+
+# air_time é em minutes
+
+# distance/air_time - miles/minutes
+
+
+
+flights %>% filter(origin == "LGA", day == 7, month == 9) %>%
+  mutate(air_time_hour = air_time / 60,
+         velocidade_miles_per_minute = distance / air_time,
+         velocidade_miles_per_hour = distance / air_time_hour)
+```
+
+
+
+- Uma tabela com apenas o atraso na chegada de todos os voos atrasados por pelo menos 60 minutos que partiram do aeroporto Newark e chegaram em Buffalo (BUF) nas sextas-feiras de qualquer mes.
+
+```{r}
+flights %>% 
+  mutate(week_day = lubridate::wday(time_hour)) %>% 
+  filter(arr_delay > 60, origin == "EWR", dest == "BUF", 
+         day == 6) %>% 
+  select(week_day, origin, dest, arr_delay, day)
+```
+
+
+- Uma tabela dos números dos aviões (tailnum), destino, distância e a velocidade em milhas por hora para voos que voaram em maio pelo menos 1000 milhas ou com velocidade acima de 500 milhas por hora.
+
+
+
+```{r}
+flights %>%
+  mutate(velocidade_milhas_por_hora = round(distance / (air_time / 60), 2)) %>%
+  filter(month == 5) %>%
+  filter(distance > 1000 | velocidade_milhas_por_hora > 500) %>%
+  select(month, tailnum, dest,
+         distance, velocidade_milhas_por_hora) %>%
+  arrange(distance, velocidade_milhas_por_hora)
+```
+
+
+- Prepare os resultados de todos as análises acima em tabelas usando a opção de R Markdown de df_print: paged (veja o Tutorial 1), e faça o knit do seu script de R markdown para produzir o relatório final.
+
+ok!
+
+
+## Exercício 2: Relatórios Limpos
+
+Experimente adicionar um chunk com essa linha acima como o primeiro no seu relatório do Execício 1, e ‘Knit’ de novo. Veja quão mais simples e bonito fica o seu relatório!
+
+Ok! Deixei echo = TRUE para que tenha os códigos na versão html
+
+
+## Exercício 3: Abrindo Dados Eleitorais
+
+1) Escolha um banco de dados (qualquer arquivo único) da aba ‘Resultados’ do site do Tribunal Superior Eleitoral aqui, baixa-lo e unzip ele.
+
+
+2018 - Votação nominal por município e zona (formato ZIP)
+
+```{r}
+url <- 'http://agencia.tse.jus.br/estatistica/sead/odsele/votacao_candidato_munzona/votacao_candidato_munzona_2018.zip'
+
+destfile <- "dados/votacao_candidato_munzona_2018.zip"
+
+curl::curl_download(url, destfile)
+
+utils::unzip(destfile)
+
+
+
+```
+
+
+2) Use uma função apropriada para abrir o arquivo em R.
+
+3) Use o arquivo leiame.pdf que fica no zip com o arquivo do TSE para identificar o encoding dos dados, e os nomes das variáveis. Incorporar esta informação na abertura do arquivo.
+
+4) Crie uma tabela bonita em R Markdown, e verifique que o número de colunas e observações fazem sentido.
+
+5) Tente manipular a base utilizando as funções que aprendemos no tutorial de hoje.
