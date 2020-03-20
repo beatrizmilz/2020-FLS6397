@@ -10,7 +10,7 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     - [x]  Capítulo 4
     - [ ]  Capítulo 5
     - [x]  Capítulo 9
-    - [ ]  Capítulo 10 
+    - [x]  Capítulo 10 
     - [ ]  Capítulo 11
     
     
@@ -19,7 +19,16 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
   - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2_exercicios.html)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 12
-    - [ ]  Capítulo 15 
+    - [x]  Capítulo 15 
     - [ ]  Capítulo 27
-
-
+    
+    
+- [Aula 3](https://jonnyphillips.github.io/Ciencia_de_Dados/limpando_dados.html):
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_3/aula_3.html)
+  - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_3/aula_3_exercicios.html)
+  - Leituras - R 4 Data Science:
+    - [ ]  Capítulo 06
+    - [ ]  Capítulo 08 
+    - [ ]  Capítulo 17
+    - [ ]  Capítulo 18
+    - [ ]  Capítulo 19 

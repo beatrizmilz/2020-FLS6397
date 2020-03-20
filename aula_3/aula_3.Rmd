@@ -1,0 +1,243 @@
+---
+title: "Aula 3 - Organizando e Limpando Dados"
+author: "Beatriz Milz"
+date: "20/03/2020"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+
+## Dividindo e Unificando Variáveis
+
+### Dividir Variáveis (separate)
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+```{r}
+ex_separate <- tibble(id = 1:3,
+                      mes_ano = c("jan2013",
+                                  "mar2009",
+                                  "out2015"))
+
+ex_separate
+
+
+
+ex_separate %>%
+  separate(mes_ano, c("Mes", "Ano") , 3)
+
+
+ex_separate %>%
+  separate(mes_ano, c("Mes", "Ano") , 3, remove = FALSE) 
+
+
+```
+
+```{r}
+ex_separate_2 <- tibble(ID = 1:3,
+                        Mes_Ano = c("janeiro_2013", "marco_2009", "outobro_2015"))
+
+ex_separate_2 %>% separate(Mes_Ano, c("mes", "ano"), "_")
+
+```
+
+### Unificar Variáveis (unite)
+
+```{r}
+ex_separate_3 <- ex_separate_2 %>% separate(Mes_Ano, c("mes", "ano"), "_")
+
+ex_separate_3 %>% unite("mes_ano", c("mes", "ano"))
+
+ex_separate_3 %>% unite("mes_ano", c("mes", "ano"), sep = " ")
+```
+
+## Recodificação de Variáveis
+
+```{r}
+ex_recodificar <- tibble(ID=1:3,
+                        Mes=c("janeiro","february","outubro"),
+                        Ano=c(2013, 2009, 2015))
+```
+
+```{r}
+ex_recodificar %>%  mutate(mes = case_when(
+  Mes == "february" ~ "fevereiro",
+   TRUE ~ Mes      # INTERESSANTE!
+))
+```
+
+```{r}
+ex_recodificar %>% mutate(depois_2010 = 
+                            case_when(Ano > 2010 ~ TRUE,
+                                      Ano <= 2010 ~ FALSE))
+```
+
+```{r}
+ex_recodificar %>% mutate(Nova_Variavel=case_when(Ano>=2014~"Sim",
+                                                  Ano<2014 & Mes=="janeiro"~Mes,
+                                                  Ano<2014 & Mes=="february"~"Não"))
+```
+
+
+## Ordenando os nossos dados
+
+### Ordenar: Arrange
+```{r}
+ex_arrange <- tibble(ID=1:10,
+                     Ano=c(2008, 2005, 2009, 2006, 2006, 2007, 2008, 2005, 2008, 2005),
+                     Mes=c("Abril","Novembro","Julho","Março","Novembro","Fevereiro",
+                           "Junho","Novembro","Janeiro","Outubro"),
+                     Valor=c(750,800,300,500,850,450,600,450,700,350))
+```
+
+```{r}
+ex_arrange %>% arrange(Ano, -Valor)
+```
+
+```{r}
+ex_arrange %>% arrange(Valor)
+```
+
+### Filtrar para os Mairoes/Menores: top_n e top_frac
+
+```{r}
+ex_arrange %>% top_n(5, Valor)
+
+
+
+ex_arrange %>% top_n(-5, Valor)
+```
+
+
+
+```{r}
+ex_arrange %>% top_frac(0.3, Valor)
+```
+
+## Dados de Time-Series: lag e lead
+
+```{r}
+ex_arrange %>% arrange(Ano) %>% 
+  mutate(Valor_anterior = lag(Valor),
+         valor_diferenca = Valor - Valor_anterior)
+```
+```{r}
+ex_arrange %>% arrange(Ano) %>% 
+  mutate(Valor_seguinte = lead(Valor))
+```
+
+## Factors
+
+```{r}
+ex_arrange <- tibble(ID = 1:10, Ano = c(2008, 2005, 2009, 2006, 2006, 2007, 
+    2008, 2005, 2008, 2005), Mes = factor(c("Abril", "Novembro", "Julho", 
+    "Março", "Novembro", "February", "Junho", "Novembro", "Janeiro", "Outubro"), 
+    levels = c("Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro")), 
+    Valor = c(750, 800, 300, 500, 850, 450, 600, 450, 700, 350))
+
+ex_arrange
+```
+
+
+
+```{r}
+ex_arrange <- tibble(ID = 1:10, Ano = c(2008, 2005, 2009, 2006, 2006, 2007, 
+    2008, 2005, 2008, 2005), Mes = factor(c("Abril", "Novembro", "Julho", 
+    "Março", "Novembro", "Fevereiro", "Junho", "Novembro", "Janeiro", "Outubro"), 
+    levels = c("Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"), 
+    ordered = T), Valor = c(750, 800, 300, 500, 850, 450, 600, 450, 700, 
+    350))
+
+ex_arrange %>% arrange(Ano, Mes)
+```
+
+### Completando Bancos de Dados Parciais: complete
+
+```{r}
+ex_arrange %>% complete(Ano, Mes)
+```
+```{r}
+ex_arrange %>% complete(Ano, Mes, fill = list(Valor = 0))
+```
+```{r}
+ex_arrange %>% complete(Ano, Mes, fill = list(Valor = 0)) %>%
+  mutate(
+    ID_NA = case_when(is.na(ID) ~ 1,
+                      TRUE ~ 0),
+    Valor = case_when(Valor == 0 ~ NA_real_,
+                      TRUE ~ Valor),
+    ID = replace_na(ID, "Desconhecido")
+  )
+```
+
+## Recodificação de levels de Factors
+
+```{r}
+library(forcats)
+```
+
+```{r}
+ex_arrange %>% mutate(Mes = fct_recode(Mes,
+                                       "abril" = "Abril",
+                                       "junho" = "Junho"))
+```
+```{r}
+ex_arrange %>% mutate(Mes = fct_relevel(
+  Mes,
+  c(
+    "Dezembro",
+    "Novembro",
+    "Outubro",
+    "Setembro",
+    "Agosto",
+    "Julho",
+    "Junho",
+    "Maio",
+    "Abril",
+    "Março",
+    "Fevereiro",
+    "Janeiro"
+  )
+)) %>% arrange(Ano, Mes)
+```
+```{r}
+ex_arrange %>% mutate(Mes = fct_collapse(Mes, "Q1" = c("Janeiro", "Fevereiro", "Março")))
+```
+
+## Identificando Casos/Valores Únicos (distinct)
+
+```{r}
+flights %>% distinct(origin)
+```
+
+```{r}
+flights %>% distinct(origin, carrier) %>%
+  arrange(origin, carrier)
+```
+
+```{r}
+flights %>% distinct(year, month, day, dep_time, carrier, flight, origin, dest)
+```
+
+```{r}
+flights %>% distinct(year, month, day, dep_time, tailnum)
+```
+
+
+## Exercícios 
+
+```{r eval=FALSE, include=TRUE}
+rstudioapi::navigateToFile("aula_3_exercicios.Rmd")
+```
