@@ -105,7 +105,7 @@ Transforme a variável origin para um factor (não-ordenado).
 ```{r}
 ex1 <- flights %>% mutate(origin = as_factor(origin))
 
-ex1
+levels(ex1$origin)
 ```
 
 

@@ -1,6 +1,7 @@
 # [2020-FLS6397](https://github.com/beatrizmilz/2020-FLS6397/)
 Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [neste repositório](https://github.com/beatrizmilz/studying_R4DS).
 
+## Tutoriais das aulas
 
 - [Aula 1](https://jonnyphillips.github.io/Ciencia_de_Dados/introducao.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_1/1_introducao.html)
@@ -32,3 +33,6 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     - [ ]  Capítulo 17
     - [ ]  Capítulo 18
     - [ ]  Capítulo 19 
+
+## Desafios
+- [ ] [Desafio 1](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_1.html)
