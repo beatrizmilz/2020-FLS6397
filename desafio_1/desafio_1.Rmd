@@ -1,7 +1,7 @@
 ---
 title: 'Desafio 1: De Banco de Dados ao Relatório (em andamento)'
 author: "Beatriz Milz"
-date: "20/03/2020"
+date: "Entregar até 14h00 de 27/03/2020"
 output:
   html_document:
     df_print: paged
@@ -19,10 +19,7 @@ knitr::opts_chunk$set(
 
 ```{r}
 ## Carregar pacotes
-
-library(tidyverse)
-library(readr) # pacote usado para abrir arquivos
-library(janitor)
+library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
 ```
 
 ## Roteiro
@@ -44,25 +41,26 @@ if (!dir.exists("dados/")) {
 }
 
 # Onde queremos salvar o zip, e com qual nome?
-destfile <- "dados/votacao_candidato_munzona_2012.zip"
+destfile <- paste0("dados/", basename(url))
 
 # Faz o download do arquivo zip
-curl::curl_download(url, destfile)
+curl::curl_download(url, destfile) 
+beepr::beep(2) # faz um som para avisar quando o download terminou!
 
 # Descompacta o arquivo zip
-# utils::unzip(destfile, exdir = "//dados") # DESCOMPACTEI MANUALMENTE! RStudio estava abortando a sessão ao executar o código!
-
+zip::unzip(destfile, exdir = "dados/")
 ```
 
 **2. Abre o arquivo para São Paulo (votacao_candidato_munzona_2012_SP.txt) em R com os nomes de colunas e o encoding corretos de acordo com a seção relevante de leaime.pdf.**
+
+- Encoding: Latin-1
 
 ```{r include=FALSE}
 
 # Abre a base de dados utilizando o "Import Dataset". 
 
-
 votacao_candidato_munzona_2012_SP <-
-  read_delim(
+  readr::read_delim(
     "dados/votacao_candidato_munzona_2012_SP.txt",
     ";",
     escape_double = FALSE,
@@ -74,7 +72,7 @@ votacao_candidato_munzona_2012_SP <-
 # Quais são os nomes das variáveis que estão na base?
 names(votacao_candidato_munzona_2012_SP)
 
-# É preciso corrigir!
+# É preciso corrigir o nome das variáveis!
 ```
 - Os nomes das variáveis foram obtidos páginas 12 e 13 do arquivo `LEIAME.pdf`.
 
@@ -133,26 +131,21 @@ glimpse(votacao)
 
 **3. Lendo o leaime.pdf e observando as variáveis no banco de dados, o que representa uma observação (uma linha)? Ou seja, qual a unidade de análise aqui?**
 
-- Número de votos por zona eleitoral
+- Número de votos por candidato, por zona eleitoral
 
 **4. Leia até o final as instruções e identifique quais variáveis serão necessárias para o resto do exercício. Tire do seu banco de dados as variáveis desnecesárias.**
 
 ```{r}
-
-# usando a função select, retira as  variáveis não necessárias
+# usando a função select, retira as  variáveis não necessárias para o desafio
 votacao_limpa <-
   votacao %>% select(
-    -data_geracao,
-    -hora_geracao,
-    -ano_eleicao,-sigla_uf,
-    -sigla_ue,
-    -descricao_eleicao,-codigo_cargo,
-    -cod_sit_cand_superior,
-    -desc_sit_candidato,-composicao_legenda,
-    -nome_coligacao,
-    -nome_partido,-sequencial_legenda,
-    -codigo_sit_cand_tot,-codigo_sit_candidato,
-    -desc_sit_cand_superior,-sq_candidato
+    -data_geracao,-hora_geracao,-ano_eleicao,
+    -sigla_uf,-sigla_ue,-descricao_eleicao,
+    -codigo_cargo,-cod_sit_cand_superior,-desc_sit_candidato,
+    -composicao_legenda,-nome_coligacao,-nome_partido,
+    -sequencial_legenda,-codigo_sit_cand_tot,
+    -codigo_sit_candidato,-desc_sit_cand_superior,
+    -sq_candidato
   )
 ```
 
@@ -160,100 +153,132 @@ votacao_limpa <-
 - **As variáveis disponíveis na base selecionada são:** `r names(votacao_limpa) %>% as_vector()`. 
 
 
+**7. Renomeie a variável com nome pouco claro DESC_SIT_CAND_TOT para RESTULADO**
+
+- Mudei a ordem dos exercícios. Renomear a coluna é melhor ser feito na etapa de limpar e arrumar dados, antes da manipulação dos dados.
+
+```{r}
+# usando a função rename, renomeia a coluna
+
+votacao_limpa <- votacao_limpa %>%
+  rename(resultado = desc_sit_cand_tot)
+
+head(votacao_limpa)
+```
+
+
 **5. Selecione apenas as linhas que contém resultados eleitorais para o primeiro turno da eleição do prefeito(a).**
 
 ```{r}
-# usa a função filter, para filtrar os dados do primeiro turno, e para cargo de prefeito
+# usa a função filter, para filtrar os dados do primeiro turno, e para cargo de prefeito. Como iremos usar esse resultado em outros exercícios, salvei essa base filtrada como pref_1turno.
 
-votacao_limpa %>%
+pref_1turno <- votacao_limpa %>%
   filter(num_turno == 1 &
            descricao_cargo == "PREFEITO")
+
+pref_1turno
 ```
 
 **6. Note que candidatos podem aparecer mais de uma vez na tabela em Q4 (porque existem múltiplas zonas em cada município). Usando identificadores únicos, identifique os candidatos distintos para o primeiro turno do prefeito. Explique no seu relatório quantos candidatos concorrem para prefeito no primeiro turno em 2012.**
 
 ```{r echo=FALSE}
-cand_pref_1turno <- votacao_limpa %>%
-  filter(num_turno == 1 & descricao_cargo == "PREFEITO") %>%
+
+# Usando a base de prefeitos no primeiro turno filtrada anteriormente, organizo por número decrescente de voltos (com a função arrange), e obtenho apenas os valores únicos (distintos) com a função distinct
+
+distinct_cand_pref_1turno <- pref_1turno %>% 
   arrange(desc(total_votos)) %>% 
   distinct(nome_candidato) 
 
-cand_pref_1turno
+distinct_cand_pref_1turno
 
 ```
 
-- `r nrow(cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012!
+- `r nrow(distinct_cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012.
 
-
-**7. Renomeie a variável com nome pouco claro DESC_SIT_CAND_TOT para RESTULADO**
-
-```{r}
-votacao_limpa <- votacao_limpa %>%
-  rename(resultado = desc_sit_cand_tot)
-
-# glimpse(votacao_limpa)
-head(votacao_limpa)
-```
 
 
 **8. Filtrar os dados para os candidatos que se candidataram com Nome de Urna ígual ao seu Nome completo, e identifique os candidatos únicos de novo. No seu relatório, explique qual percentagem de todos os candidatos para prefeito no primeiro turno isso representa.**
 
 ```{r}
-cand_nome_igual <- votacao_limpa %>% 
+
+# Usando a base de prefeitos no primeiro turno filtrada anteriormente, filtro candidatos que o nome seja igual ao nome de urna (com a função filter), e obtenho os dados únicos (com a função distinct)
+
+cand_nome_igual <- pref_1turno %>% 
   filter(nome_candidato == nome_urna_candidato) %>%
-  filter(num_turno == 1 &
-           descricao_cargo == "PREFEITO") %>%
   distinct(nome_candidato)
 ```
 
 ```{r}
-porcentagem <- round((nrow(cand_nome_igual) / nrow(cand_pref_1turno)) * 100, digits = 2)
+# Com a função nrow, conto o número de linhas(com nrow) na base `cand_nome_igual` (que aqui representa o número de candidados que tem o nome igual ao nome de urna), e divido pelo número de linhas na base `distinct_cand_pref_1turno`, que são todos os prefeitos que participaram do primeiro turno.
+# depois de dividir, multiplico por 100 para obter a porcentagem.
+# usando a função round, arredondo o valor percentual obtido para conter apenas 2 casas decimais!
+
+porcentagem <- round((nrow(cand_nome_igual) / nrow(distinct_cand_pref_1turno)) * 100, digits = 2)
 ```
 
-> `r nrow(cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012! Porém apenas `r nrow(cand_nome_igual)` candidatos utilizaram o seus nomes completos como o nome de urna. Isso significa que `r porcentagem` % dos candidatos usou o seu nome de urna igual ao seu nome completo.
+- `r nrow(distinct_cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012! Porém apenas `r nrow(cand_nome_igual)` candidatos utilizaram o seus nomes completos como o nome de urna. Isso significa que `r porcentagem` % dos candidatos usou o seu nome de urna igual ao seu nome completo.
 
 
-1. Quantos dos candidatos identificados em Q6 foram eleitos no primeiro turno?
+**9. Quantos dos candidatos identificados em Q8 foram eleitos no primeiro turno?**
 
 ```{r}
-eleitos_1turno_pref <- votacao_limpa %>%
-  filter(num_turno == 1 & descricao_cargo == "PREFEITO") %>% 
+
+# Filtra a base de prefeito que participou no primeiro turno, para apenas prefeitos que foram eleitos
+
+eleitos_1turno_pref <- pref_1turno %>%
+   filter(nome_candidato == nome_urna_candidato) %>% 
   filter(resultado == "ELEITO")
 ```
 
-> `r nrow(eleitos_1turno_pref)` candidatos foram eleitos no primeiro turno, para o cargo de Prefeito(a).
+- `r nrow(eleitos_1turno_pref)` candidatos foram eleitos no primeiro turno, para o cargo de Prefeito(a), e tem o nome igual ao nome da urna.
 
-1. Voltando para os dados de todos os candidatos no primeiro turno, vamos focar a nossa análise no município de São Paulo (código do TSE 71072). Ordene os dados por número de votos e identifique qual candidato recebeu o maior número de votos em qualquer zona da cidade.
+**10. Voltando para os dados de todos os candidatos no primeiro turno, vamos focar a nossa análise no município de São Paulo (código do TSE 71072). Ordene os dados por número de votos e identifique qual candidato recebeu o maior número de votos em qualquer zona da cidade.**
 
 ```{r}
 
-# na questão não deixa claro qual é o cargo. Então presumo que seja para Prefeito(a).
-
-votacao_sp_pref_1turno <- votacao_limpa %>% 
-  filter(num_turno == 1 & descricao_cargo == "PREFEITO") %>% 
-  filter(codigo_municipio == "71072") %>% 
-  arrange(desc(total_votos))
+votacao_sp_pref_1turno <- pref_1turno %>% 
+  filter(codigo_municipio == "71072") %>% # filtra o municípo de são paulo
+  arrange(desc(total_votos)) # ordena em ordem decrescente o número de votos por zona
 
 
 head(votacao_sp_pref_1turno)
 ```
 
-> O candidato que  recebeu o maior número de votos (em qualquer zona da cidade), no primeiro turno, para o cargo de Prefeito(a), foi `r stringr::str_to_title(votacao_sp_pref_1turno$nome_candidato[1])`.
+- O candidato que  recebeu o maior número de votos (em qualquer zona da cidade), no primeiro turno, para o cargo de Prefeito(a), foi `r stringr::str_to_title(votacao_sp_pref_1turno$nome_candidato[1])`.
 
-1. Usando a sua própria classificação, crie uma nova variável que descreve a ideologia de cada partido no banco de dados do município de São Paulo nas três categorias ‘Esquerda’, ‘Direita’ e ‘Outro’.
+**11. Usando a sua própria classificação, crie uma nova variável que descreve a ideologia de cada partido no banco de dados do município de São Paulo nas três categorias ‘Esquerda’, ‘Direita’ e ‘Outro’.**
+
+```{r eval=FALSE, include=FALSE}
+# Quais são os partidos que participaram, e que devem ser considerados na classificação?
+
+votacao_limpa %>% 
+  filter(codigo_municipio == "71072") %>% # filtra o município de são paulo
+  distinct(sigla_partido) # obtem os valores únicos, distintos
+```
+
 
 ```{r}
 
-votacao_limpa %>% filter(codigo_municipio == "71072") %>%
-  distinct(sigla_partido)
+# Usando o mutate e case_when, cria nova coluna com a  classificação de ideologia de partidos
 
-votacao_limpa %>% filter(codigo_municipio == "71072") %>%
+votacao_limpa %>% 
+  filter(codigo_municipio == "71072") %>% # filtra o municípi de são paulo
   mutate(
-    ideologia = case_when(
+    ideologia = case_when( # cria nova coluna ideologia, que receberá os valores
+      
+      
+      # Partidos da esquerda
       sigla_partido %in% c("PSOL", "PT", "PDT", "PSTU", "PC do B", "PCO", "PSB","PCB")  ~ "Esquerda",
+      
+      #Partidos da direita
       sigla_partido %in% c("PSD", "PSDB", "PRP", "PTC", "PSL", "PRTB", "PSDC", "DEM", "PP", "PSC") ~ "Direita",
+      
+      # Partidos classificados como Outro - Centro?
       sigla_partido %in% c("PV", "PMN", "PTN", "PMDB", "PTB") ~ "Outro",
-      TRUE ~ "Não sei"
+      
+      
+      # Os valores que não coloquei em nenhuma outra categoria receberão "Outro
+      TRUE ~ "Outro"
     )
   ) 
 
@@ -261,30 +286,43 @@ votacao_limpa %>% filter(codigo_municipio == "71072") %>%
 ```
 
 
-1. Criei uma variável que indica se o candidato no município de São Paulo recebeu mais de 10.000 votos na zona.
+**12. Crie uma variável que indica se o candidato no município de São Paulo recebeu mais de 10.000 votos na zona.**
 
 ```{r}
-votacao_limpa %>% filter(codigo_municipio == "71072") %>% 
+# Com o mutate e case_when, cria nova coluna de dados lógicos (TRUE/FALSE), sendo TRUE quem recebeu mais de 10 mil votos na zona.
+
+pref_1turno %>%
+  filter(codigo_municipio == "71072") %>%  # filtra municipio de são paulo
   mutate(mais_10milvotos = case_when(total_votos > 10000 ~ TRUE,
                                      TRUE ~ FALSE)) %>% 
   arrange(desc(total_votos))
 ```
 
 
-1. Voltando para os dados orginais, filtrar para os dados dos vereadores. Agora, imagine que não temos os dados do partido de cada candidato e queremos recuperar do NUMERO_CAND, em que os primeiros dois digitos sempre refletem o número do partido do candidato. Divida a coluna NUMERO_CAND em duas para criar uma coluna de NUM_PARTIDO e outra de NUM_CAND_RESTANTE.
+**13. Voltando para os dados orginais, filtrar para os dados dos vereadores. Agora, imagine que não temos os dados do partido de cada candidato e queremos recuperar do NUMERO_CAND, em que os primeiros dois digitos sempre refletem o número do partido do candidato. Divida a coluna NUMERO_CAND em duas para criar uma coluna de NUM_PARTIDO e outra de NUM_CAND_RESTANTE.**
 
 ```{r}
+# Com a função filter, filtramos as linhas para cargo de vereador,
+# e com a função separate , separamos a coluna numero_cand
 sep <- votacao_limpa %>%
   filter(descricao_cargo == "VEREADOR") %>% 
   separate(numero_cand, c("num_partido", "num_cand_restante"), 2)
+
+sep
 ```
 
 
-1. Agora, unifique as colunas NUM_PARTIDO e NUM_CAND_RESTANTE criado em Q9. O resultado deve ser ígual à coluna original NUMERO_CAND.
+**14. Agora, unifique as colunas NUM_PARTIDO e NUM_CAND_RESTANTE criado em Q9. O resultado deve ser ígual à coluna original NUMERO_CAND.**
 
 ```{r}
-sep %>% unite(numero_cand_novo, c(num_partido, num_cand_restante), sep = "")
+
+# Com a função unite unimos novamente as colunas separadas anteriormente
+
+sep %>%
+  unite(numero_cand_novo, c(num_partido, num_cand_restante), sep = "")
 ```
 
 
-1. Limpe o seu script e Knit para um documento de HTML, por exemplo adicionando comentários, verificando que as respostas fazem sentidos, inserindo in-line código, tirando o código, warnings e mensagens do documento final, e formatando as tabelas melhores com df_print: paged no cabeçalho.
+**15. Limpe o seu script e Knit para um documento de HTML, por exemplo adicionando comentários, verificando que as respostas fazem sentidos, inserindo in-line código, tirando o código, warnings e mensagens do documento final, e formatando as tabelas melhores com df_print: paged no cabeçalho.**
+
+- Feito! :)
