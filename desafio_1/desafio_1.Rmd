@@ -1,7 +1,8 @@
 ---
-title: 'Desafio 1: De Banco de Dados ao Relatório (em andamento)'
+title: 'Desafio 1: De Banco de Dados ao Relatório'
+subtitle: "Entregar até 14h00 de 27/03/2020"
 author: "Beatriz Milz"
-date: "Entregar até 14h00 de 27/03/2020"
+date: "HTML compilado em: `r format(Sys.Date(), format='%d de %B de %Y')`"
 output:
   html_document:
     df_print: paged
