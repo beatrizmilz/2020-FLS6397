@@ -5,11 +5,11 @@ date: "Entregar até 14h00 de 27/03/2020"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-	echo = FALSE,
 	message = FALSE,
 	warning = FALSE
 )
@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 
 ```{r}
 ## Carregar pacotes
+
 library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
 ```
 
@@ -44,7 +45,7 @@ if (!dir.exists("dados/")) {
 destfile <- paste0("dados/", basename(url))
 
 # Faz o download do arquivo zip
-curl::curl_download(url, destfile) 
+curl::curl_download(url, destfile)
 beepr::beep(2) # faz um som para avisar quando o download terminou!
 
 # Descompacta o arquivo zip
@@ -55,9 +56,9 @@ zip::unzip(destfile, exdir = "dados/")
 
 - Encoding: Latin-1
 
-```{r include=FALSE}
+```{r}
 
-# Abre a base de dados utilizando o "Import Dataset". 
+# Abre a base de dados utilizando o "Import Dataset".
 
 votacao_candidato_munzona_2012_SP <-
   readr::read_delim(
@@ -70,8 +71,8 @@ votacao_candidato_munzona_2012_SP <-
   )
 
 # Quais são os nomes das variáveis que estão na base?
-names(votacao_candidato_munzona_2012_SP)
 
+# names(votacao_candidato_munzona_2012_SP)
 # É preciso corrigir o nome das variáveis!
 ```
 - Os nomes das variáveis foram obtidos páginas 12 e 13 do arquivo `LEIAME.pdf`.
@@ -113,7 +114,7 @@ nome_var <- c(
 )
 ```
 
-```{r include=FALSE}
+```{r}
 
 # usando o vetor criado, renomeia as variáveis da base
 names(votacao_candidato_munzona_2012_SP) <- nome_var
@@ -123,7 +124,7 @@ votacao <-
   votacao_candidato_munzona_2012_SP %>% janitor::clean_names()
 
 # Função glimpse ajuda a ter uma ideia dos tipos de dados
-glimpse(votacao)
+# glimpse(votacao)
 ```
 
 - **As variáveis disponíveis na base são:** `r names(votacao) %>% as_vector()`.
@@ -248,7 +249,7 @@ head(votacao_sp_pref_1turno)
 
 **11. Usando a sua própria classificação, crie uma nova variável que descreve a ideologia de cada partido no banco de dados do município de São Paulo nas três categorias ‘Esquerda’, ‘Direita’ e ‘Outro’.**
 
-```{r eval=FALSE, include=FALSE}
+```{r eval=FALSE}
 # Quais são os partidos que participaram, e que devem ser considerados na classificação?
 
 votacao_limpa %>% 
@@ -305,7 +306,7 @@ pref_1turno %>%
 # Com a função filter, filtramos as linhas para cargo de vereador,
 # e com a função separate , separamos a coluna numero_cand
 sep <- votacao_limpa %>%
-  filter(descricao_cargo == "VEREADOR") %>% 
+  filter(descricao_cargo == "VEREADOR") %>%
   separate(numero_cand, c("num_partido", "num_cand_restante"), 2)
 
 sep
