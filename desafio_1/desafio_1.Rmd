@@ -218,7 +218,7 @@ cand_nome_igual <- pref_1turno %>%
 porcentagem <- round((nrow(cand_nome_igual) / nrow(distinct_cand_pref_1turno)) * 100, digits = 2)
 ```
 
-- `r nrow(distinct_cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012! Porém apenas `r nrow(cand_nome_igual)` candidatos utilizaram o seus nomes completos como o nome de urna. Isso significa que `r porcentagem` % dos candidatos usou o seu nome de urna igual ao seu nome completo.
+- `r nrow(distinct_cand_pref_1turno)` candidatos concorreram para o cargo de Prefeito no primeiro turno em 2012! Porém apenas `r nrow(cand_nome_igual)` candidatos utilizaram o seus nomes completos como o nome de urna. Isso significa que `r porcentagem` % dos candidatos usaram os seus nomes de urna iguais aos seus nomes completos.
 
 
 **9. Quantos dos candidatos identificados em Q8 foram eleitos no primeiro turno?**
@@ -232,7 +232,7 @@ eleitos_1turno_pref <- pref_1turno %>%
   filter(resultado == "ELEITO")
 ```
 
-- `r nrow(eleitos_1turno_pref)` candidatos foram eleitos no primeiro turno, para o cargo de Prefeito(a), e tem o nome igual ao nome da urna.
+- `r nrow(eleitos_1turno_pref)` candidatos tem o nome igual ao nome da urna, e  foram eleitos no primeiro turno, para o cargo de Prefeito(a).
 
 **10. Voltando para os dados de todos os candidatos no primeiro turno, vamos focar a nossa análise no município de São Paulo (código do TSE 71072). Ordene os dados por número de votos e identifique qual candidato recebeu o maior número de votos em qualquer zona da cidade.**
 
@@ -279,7 +279,7 @@ votacao_limpa %>%
       sigla_partido %in% c("PV", "PMN", "PTN", "PMDB", "PTB") ~ "Outro",
       
       
-      # Os valores que não coloquei em nenhuma outra categoria receberão "Outro
+    # Os valores que não coloquei em nenhuma outra categoria receberão "Outro"
       TRUE ~ "Outro"
     )
   ) 
