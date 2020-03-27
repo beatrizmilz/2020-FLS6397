@@ -9,6 +9,7 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 - [Aula 1](https://jonnyphillips.github.io/Ciencia_de_Dados/introducao.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_1/1_introducao.html)
   - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_1/1_introducao_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras - R 4 Data Science:
     - [x]  Capítulo 2
     - [x]  Capítulo 4
@@ -21,6 +22,7 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 - [Aula 2](https://jonnyphillips.github.io/Ciencia_de_Dados/abrindo_manipulando.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2.html)
   - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_2/aula_2_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 12
     - [x]  Capítulo 15 
@@ -30,12 +32,21 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 - [Aula 3](https://jonnyphillips.github.io/Ciencia_de_Dados/limpando_dados.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_3/aula_3.html)
   - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_3/aula_3_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 06
     - [ ]  Capítulo 08 
     - [ ]  Capítulo 17
     - [ ]  Capítulo 18
     - [ ]  Capítulo 19 
+    
+    
+- [Aula 4](https://jonnyphillips.github.io/Ciencia_de_Dados/Estatisticas_Resumidas.html):
+  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4.html)
+  - [ ]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
+
+
 
 ## Desafios
-- [ ] [Desafio 1](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_1.html)
+- [x] [Desafio 1](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_1.html) - Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_1/desafio_1.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_1/desafio_1.Rmd)

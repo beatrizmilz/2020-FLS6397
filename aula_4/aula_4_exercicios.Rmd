@@ -1,0 +1,126 @@
+---
+title: "Exercícios Aula 4 - Calculando Estatisticas Resumidas"
+author: "Beatriz Milz"
+date: "27/03/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+```
+
+
+##Exercício 1: Análises por Grupo
+
+Usando o banco de dados de flights no pacote nycflights13, responda às seguintes perguntas:
+
+1) Calcule a duração (air_time) média por companhia aérea (carrier).
+
+```{r}
+flights %>% 
+  group_by(carrier) %>% 
+  summarise(air_time_media = mean(air_time, na.rm = TRUE))
+```
+
+
+2) Calcule a duração (air_time) média por companhia aérea (carrier) e mês.
+
+```{r}
+flights %>% 
+  group_by(carrier, month) %>% 
+  summarise(air_time_media = mean(air_time, na.rm = TRUE))
+```
+
+
+3) Calcule o atraso média por aeroporto de origem (dep_delay). Qual aeroporto tem o pior?
+
+```{r}
+flights %>% 
+  group_by(origin) %>% 
+  summarise(atraso_medio = mean(dep_delay, na.rm = TRUE))
+```
+
+
+4) Qual companhia aérea tem o pior registro de atrasos (dep_delay) na média no aeroporto JFK?
+
+```{r}
+flights %>% 
+  filter(origin == "JFK") %>% 
+  group_by(carrier) %>% 
+  summarise(media_atrasos = mean(dep_delay, na.rm = TRUE)) %>% 
+  arrange(-media_atrasos) %>% 
+  top_n(1)
+```
+
+
+5) Você odeia atrasos. Qual é o pior mês para viajar do aeroporto JFK?
+
+
+
+```{r}
+flights %>% 
+  filter(origin == "JFK") %>% 
+  group_by(month) %>% 
+  summarise(media_atrasos = mean(dep_delay, na.rm = TRUE)) %>% 
+  arrange(-media_atrasos) %>% 
+  top_n(1)
+```
+
+
+## Exercício 2: Observações por Grupo
+
+1) Quantos voos decolaram de Nova Iorque em cada mês de 2013?
+```{r}
+flights %>% 
+group_by(month) %>% 
+  tally()
+```
+
+
+
+2) Qual companhia aérea teve o maior número de voos em cada mês de 2013?
+
+```{r}
+flights %>% 
+group_by(month, carrier) %>% 
+  tally() %>% 
+  ungroup() %>% 
+  group_by(month) %>% 
+top_n(1, n)
+```
+
+
+3) Qual é a média do número de voos que decolaram dos três aeroportos por mês?
+
+
+```{r}
+flights %>% group_by(month) %>% tally() %>% summarise(media = mean(n))
+
+```
+
+
+4) Qual é a média mensal do número de voos que decolaram de cada aeroporto?
+
+```{r}
+flights %>% group_by(origin, month) %>% tally() %>% summarise(media = mean(n))
+
+```
+
+
+5) Qual horário de partida (dep_time) é o segundo mais congestionado (medida pelo número de decolagens) em cada aeroporto? (O mais congestionado é o horário NA, então é mais interessante pegar o segundo mais congestionado).
+
+
+```{r}
+flights %>% group_by(dep_time) %>% tally(sort = TRUE) %>% slice(2)
+```
+

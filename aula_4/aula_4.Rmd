@@ -1,0 +1,175 @@
+---
+title: "Aula 4 - Calculando Estatisticas Resumidas"
+author: "Beatriz Milz"
+date: "27/03/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Estatísticas Resumidas (summarize)
+
+```{r}
+library("nycflights13")
+library("tidyverse")
+flights %>% summarize(media_distance=mean(distance))
+```
+
+
+```{r}
+flights %>% summarize(
+  media_distance = mean(distance),
+  mediana_distance = median(distance),
+  sd_distance = sd(distance)
+)
+```
+
+```{r}
+estatisticas <- flights %>% summarize(
+  media_distance = mean(distance),
+  mediana_distance = median(distance),
+  sd_distance = sd(distance)
+)
+
+media_distance <- estatisticas %>% pull(media_distance)
+```
+
+"A distância média dos voos é `r media_distance`.
+
+
+
+```{r}
+flights %>% summarize(dep_delay=mean(dep_delay,na.rm=TRUE))
+```
+
+```{r}
+percentile_90_10 <- function(variavel) {
+  calculo <- quantile(variavel, probs = 0.9, na.rm = TRUE) /
+    quantile(variavel, probs = 0.1, na.rm = TRUE)
+  
+  return(calculo)
+}
+```
+
+```{r}
+flights %>% summarize(percentile_90_10_distance=percentile_90_10(distance),
+                      percentile_90_10_air_time=percentile_90_10(air_time))
+```
+
+## Grupos (group_by)
+
+```{r}
+flights_por_aeroporto <- flights %>% group_by(origin)
+```
+
+```{r}
+flights %>% group_by(origin) %>% 
+  summarize(mean_distance=mean(distance))
+```
+
+```{r}
+flights %>% group_by(origin, month) %>% 
+  summarize(mean_distance=mean(distance))
+```
+
+```{r}
+flights %>% group_by(origin, month) %>% 
+  summarize(mean_distance=mean(distance)) %>%
+  filter(origin!="LGA") %>%
+  mutate(mean_distance_km=mean_distance*1.60934)
+```
+
+```{r}
+flights %>% group_by(origin) %>%
+  top_n(1,dep_delay)
+```
+
+
+```{r eval=FALSE, include=TRUE}
+rstudioapi::navigateToFile("aula_4_exercicios.Rmd")
+```
+
+## Número do observações por Grupo (tally)
+
+
+```{r}
+flights %>% group_by(origin) %>% 
+  tally()
+```
+
+
+```{r}
+flights %>% group_by(origin, dest) %>% 
+  tally()
+```
+
+## Mutate por Grupo
+
+```{r}
+flights %>% group_by(origin) %>%
+  mutate(media_distance=mean(distance,na.rm=TRUE))
+```
+
+## Saindo de Agrupamentos (ungroup)
+
+```{r}
+flights_media <- flights %>% group_by(origin) %>%
+  mutate(media_distance=mean(distance,na.rm=TRUE))
+
+groups(flights)
+
+groups(flights_media)
+```
+
+```{r}
+flights_media %>% summarize(media_atraso=mean(dep_delay,na.rm=T))
+```
+
+```{r}
+flights_media %>% ungroup() %>% 
+  summarize(media_atraso=mean(dep_delay,na.rm=T))
+```
+
+## Porcentagens
+
+```{r}
+flights %>% 
+  mutate(Total_distance=sum(distance,na.rm=TRUE)) %>% 
+  mutate(Pct_distance=100*(distance/Total_distance))
+
+```
+
+```{r}
+flights %>% mutate(Pct_distance=100*(distance/sum(distance,na.rm=TRUE)))
+```
+
+```{r}
+flights %>% group_by(month) %>% 
+  mutate(Pct_distance_por_mes=100*(distance/sum(distance,na.rm=TRUE)))
+```
+
+```{r}
+flights %>% group_by(month, day, hour, origin) %>% 
+  mutate(Pct_distance_por_mes_hora_origem=100*(distance/sum(distance,na.rm=TRUE)))
+```
+
+```{r}
+flights %>% group_by(origin) %>% 
+  tally() %>%
+  mutate(Pct_por_aeroporto=n/sum(n))
+```
+
+```{r}
+flights %>% group_by(origin, month) %>% 
+  tally() %>%
+  group_by(origin) %>% 
+  mutate(Pct_por_mes_no_aeroporto=n/sum(n))
+```
+
+
