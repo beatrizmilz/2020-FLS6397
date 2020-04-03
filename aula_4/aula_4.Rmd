@@ -169,7 +169,42 @@ flights %>% group_by(origin) %>%
 flights %>% group_by(origin, month) %>% 
   tally() %>%
   group_by(origin) %>% 
-  mutate(Pct_por_mes_no_aeroporto=n/sum(n))
+  mutate(Pct_por_mes_no_aeroporto=100*(n/sum(n)))
 ```
 
+```{r}
+flights %>% group_by(origin, month) %>% 
+  tally() %>%
+  group_by(month) %>% 
+  mutate(Pct_por_mes_no_aeroporto=100*(n/sum(n)))
+```
+
+## Habilidade Básica de Programação: Filtros Avançados (%in%)
+```{r}
+flights %>% filter(dest=="ILM"|dest=="ACK"|dest=="GRR"|dest=="PSP") %>%
+  mutate(Pct_distance=100*(distance/sum(distance,na.rm=TRUE)))
+```
+
+```{r}
+flights %>% filter(dest %in% c("ILM", "ACK", "GRR", "PSP")) %>%
+  mutate(Pct_distance=100*(distance/sum(distance,na.rm=TRUE)))
+```
+
+## Resumos e Transformações de Múltiplas Colunas (summarize_all)
+
+```{r}
+flights %>% summarize_all(mean,na.rm=TRUE)
+```
+
+## Transformações de Colunas específicas (mutate_all, mutate_at, mutate_if)
+
+```{r}
+flights %>% mutate_at(vars(year, month, day, dep_time, sched_dep_time, 
+    dep_delay, arr_time, sched_arr_time, arr_delay, flight, air_time, distance, 
+    hour, minute), scale)
+```
+
+```{r}
+flights %>% mutate_if(is.numeric, scale)
+```
 

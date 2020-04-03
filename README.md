@@ -42,8 +42,8 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     
     
 - [Aula 4](https://jonnyphillips.github.io/Ciencia_de_Dados/Estatisticas_Resumidas.html):
-  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4.html)
-  - [ ]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4_exercicios.html)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4.html)
+  - [x]  [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_4/aula_4_exercicios.html)
   - [ ]  Revisão dos exercícios (na semana seguinte)
 
 
