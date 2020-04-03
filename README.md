@@ -48,8 +48,8 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 
 
 - [Aula 5](https://jonnyphillips.github.io/Ciencia_de_Dados/Tabelas.html):
-  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_5/aula_5.html)
-  - []   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_5/aula_5_exercicios.html)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_5/aula_5.html)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_5/aula_5_exercicios.html)
   - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 3

@@ -1,0 +1,110 @@
+---
+title: "Exercícios Aula 5 -  Construindo Tabelas"
+author: "Beatriz Milz"
+date: "27/03/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+library(knitr)
+```
+
+## Exercício 1: Tabelas Bonitas
+
+1) Gere uma tabela estática de duração (air_time) média dos voos de cada aeoporto de origem, ordenado de menor a maior duração. Inclua um título e a formatação apropriada na sua tabela.
+
+```{r}
+flights %>%
+  group_by(origin) %>%
+  summarise(duracao_media = mean(air_time, na.rm = TRUE)) %>%
+  mutate(duracao_media_h = duracao_media/60) %>%
+  arrange(-duracao_media) %>%
+  knitr::kable(
+    caption="Tabela de média do tempo dos vôos",
+    col.names = c("Aeroporto de origem", 
+                  "Duração média do vôo (minutos)" ,
+                  "Duração média do vôo (horas)"),
+    digits = 1
+    
+  )
+
+```
+
+
+2 ) Identifique os voos de origem ‘EWR’ no dia 1 de Abril com decolagem antes de 6h. Prepare uma tabela estática que mostra as variáveis dep_time, dep_delay, carrier, flight, dest, air_time, distance. Inclua um título e a formatação apropriada.
+
+```{r}
+tabela <- flights %>%
+  filter(origin == "EWR" &  day == 1 & month == 4 & dep_time < 600) %>% 
+  select(dep_time, dep_delay, carrier, flight, dest, air_time)
+  
+  
+  
+  tabela %>% 
+  knitr::kable(
+    caption="Tabela de vôos que partiram no dia 01/04/2013, antes das 6 da manhã, do aeroporto EWR",
+      col.names = c(
+        "Hora de partida", "Tempo de atraso", "Companhia Aérea", "Nº vôo", "Aeroporto de destino", "Tempo de vôo"
+      )
+    
+    
+  )
+
+  
+  
+```
+
+
+3) Duplique a tabela de questão 2, mas agora mande o resultado para uma tabela interativa de datatable. (Não se preocupe com a formatação).
+
+```{r}
+tabela %>% DT::datatable()
+```
+
+
+4) Knit o seu script para HTML e verifique que as tabelas aparecem limpas e claras.
+
+
+## Exercício 2: Virando Tabelas
+
+1) Use pivot_longer para virar a tabela flights mais longa, para que cada voo tem duas observações - uma para a hora de partida (dep_time) e uma outra para a hora de chegada (arr_time).
+
+```{r}
+ex1 <- flights %>% pivot_longer(cols = c(dep_time, arr_time), names_to = "tipo_de_horario", values_to = "horario") 
+
+head(ex1)
+```
+
+
+2) Usando o seu resultado de questão 1, gere uma tabela estática de 10 linhas selecionadas aleatoriamente por R, mostrando as variáveis carrier, flight, origin, dest e as colunas novas que você gerou na questão 1.
+
+```{r}
+set.seed(05508)
+ex1 %>% 
+  select(carrier, flight, origin, dest, horario, tipo_de_horario) %>%
+  sample_n(10) %>% 
+  knitr::kable()
+```
+
+
+3) Usando o seu resultado de questão 1, use pivot_wider para recuperar o banco de dados original de flights. Verifique que os números de colunas e linhas são íguais.
+
+```{r}
+ex3 <- pivot_wider(ex1, values_from = horario, names_from = tipo_de_horario)
+
+
+ncol(flights) == ncol(ex3)
+nrow(flights) == nrow(ex3)
+```
+

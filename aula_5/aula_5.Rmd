@@ -1,0 +1,166 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "03/04/2020"
+output:
+  html_document: null
+  word_document: default
+code_folding: hide
+title: "Aula 5 - Construindo Tabelas"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Tabelas Estáticas
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(nycflights13)
+```
+
+```{r}
+# tabela estática
+
+flights %>% filter(dest=="ANC") %>%
+  kable()
+
+```
+
+```{r}
+flights %>% sample_n(8) %>%
+  kable()
+```
+
+```{r}
+set.seed(05508)
+flights %>% sample_n(8)
+```
+```{r}
+flights %>% sample_n(8) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest) %>%
+  kable()
+```
+```{r}
+flights %>% sample_n(8) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest) %>%
+  kable(caption="Tabela de 8 voos aleatórios")
+```
+
+
+```{r}
+flights %>% sample_n(8) %>%
+  mutate(velocidade=distance/air_time) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest, velocidade) %>%
+    kable(digits=1)
+```
+
+```{r}
+flights %>% sample_n(8) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest) %>%
+    kable(col.names=c("Mês","Dia","Hora de Partida","Companhia Aérea","Voo","Origem","Destino"))
+```
+
+```{r}
+flights %>% sample_n(8) %>%
+  mutate(velocidade=distance/air_time) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest, velocidade) %>%
+    kable(digits=1, format.args=list(big.mark=".", decimal.mark=","))
+```
+
+## Tabelas Interativas
+
+```{r}
+library(DT)
+flights %>% 
+  sample_n(100) %>%
+  mutate(velocidade=distance/air_time) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest, velocidade) %>%
+  datatable()
+```
+```{r}
+flights %>% 
+  sample_n(100) %>%
+  mutate(velocidade=distance/air_time) %>%
+  select(month, day, dep_time, carrier, flight, origin, dest, velocidade) %>%
+  datatable(colnames=c("Mês","Dia","Hora de Partida","Companhia Aérea","Voo","Origem","Destino","Velocidade"), 
+            caption="Tabela de 100 voos aleatórios",
+            filter='top') %>%
+  formatRound("velocidade",1) %>%
+  formatStyle('velocidade',
+    backgroundColor = styleInterval(7, c('white', 'orange'))
+  )
+```
+
+## Mudando a Unidade de Observação (Pivot_wide, Pivot_long)
+
+```{r}
+flights %>% filter(dest=="SNA") %>% 
+  select(month, day, origin, dest)
+```
+
+### De Largo para Longo 
+
+```{r}
+flights %>% filter(dest=="SNA") %>% 
+  select(month, day, origin, dest) %>% 
+  pivot_longer(cols=c(origin, dest))
+```
+
+```{r}
+flights %>% filter(dest=="SNA") %>% 
+  select(month, day, origin, dest) %>% 
+  pivot_longer(cols=c(origin, dest), names_to="Direção", values_to="Aeroporto")
+```
+
+```{r}
+flights %>% distinct(month, day, dep_time, carrier, flight, origin, dest)
+```
+
+```{r}
+flights_longo <- flights %>% filter(dest=="SNA") %>% 
+  select(month, day, dep_time, carrier, flight, origin, dest) %>% 
+  pivot_longer(cols=c(origin, dest), names_to="Direção", values_to="Aeroporto")
+
+flights_longo 
+```
+
+### De Longo para Largo
+
+```{r}
+flights_longo %>% pivot_wider(id_cols = c(month, day, dep_time, carrier, 
+    flight), names_from = Direção, values_from = Aeroporto)
+```
+```{r}
+flights_longo %>% pivot_wider(names_from=Direção, values_from=Aeroporto)
+```
+
+
+## Voltando ao R Base Brevemente
+```{r}
+flights[ , ]
+```
+
+
+```{r}
+flights[1:5, ]
+```
+
+```{r}
+flights[flights$distance==200, ]
+```
+
+```{r}
+flights[flights$distance==200, c("month","day", "dep_time","origin","dest")]
+```
+
+
+## Totais para Tabelas
+
+```{r}
+flights %>% group_by(origin) %>%
+  tally() %>%
+  add_row(n=sum(.$n))
+```
