@@ -1,0 +1,158 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+library(readxl)
+library(tidyverse)
+```
+
+- Dados para os anos 2016, 2017 e 2018, da CETESB, sobre saneamento por município no estado de SP.
+
+- Os dados originais estão disponíveis em um PDF, no seguinte link: https://cetesb.sp.gov.br/aguas-interiores/wp-content/uploads/sites/12/2019/10/Ap%C3%AAndice-C_Dados-de-Saneamento-por-Munic%C3%ADpio.pdf
+
+- Não consegui converter para o R em uma forma automática.
+
+- Passos: 
+  - Salvei apenas as páginas do Apendice C que continham partes da tabela (arquivo cortado)
+  - Fiz a conversão no site https://pdftables.com/ - download em csv
+  - Abrir a base
+
+para 2016: não foi disponibilizado como tabela, e sim como imagem.
+
+  
+```{r}
+
+dados_2018 <- read_csv(
+  "dados_brutos/2018.csv",
+  locale = locale(decimal_mark = ",",
+                  grouping_mark = ".",
+                  encoding = "UTF-8"),
+  skip = 1,
+  col_names = c(
+    "ugrhi",
+    "municipio",
+    "consessao",
+    "pop_urbana",
+    "atendimento_coleta_porc",
+    "atendimento_tratamento_porc",
+    "eficiencia",
+    "carga_poluidora_potencial",
+    "carga_poluidora_remancescente",
+    "ictem",
+    "corpo_receptor"
+  ),
+  
+  col_types = cols(
+    "ugrhi" = col_number(),
+    "pop_urbana" = col_number(),
+    "atendimento_coleta_porc" = col_number(),
+    "atendimento_tratamento_porc" = col_number(),
+    "eficiencia" = col_number(),
+    "carga_poluidora_potencial"  = col_number(),
+    "carga_poluidora_remancescente" = col_number(),
+    "ictem" = col_number()
+  ),
+) %>% mutate(ano = 2018)
+
+glimpse(dados_2018)
+
+dados_2017 <- read_csv(
+  "dados_brutos/2017.csv",
+  locale = locale(decimal_mark = ",",
+                  grouping_mark = "."),
+  skip = 1,
+  col_names = c(
+    "ugrhi",
+    "municipio",
+    "consessao",
+    "pop_urbana",
+    "atendimento_coleta_porc",
+    "atendimento_tratamento_porc",
+    "eficiencia",
+    "carga_poluidora_potencial",
+    "carga_poluidora_remancescente",
+    "ictem",
+    "corpo_receptor"
+  ),
+  
+  col_types = cols(
+    "ugrhi" = col_number(),
+    "pop_urbana" = col_number(),
+    "atendimento_coleta_porc" = col_number(),
+    "atendimento_tratamento_porc" = col_number(),
+    "eficiencia" = col_number(),
+    "carga_poluidora_potencial"  = col_number(),
+    "carga_poluidora_remancescente" = col_number(),
+    "ictem" = col_number()
+  ),
+) %>% mutate(ano = 2017)
+
+glimpse(dados_2017)
+
+apendice_c_bruto <- bind_rows(dados_2017, dados_2018)
+
+```
+
+
+- retirar linhas que só contém NA, e linhas que não tem dados dos municípios
+
+```{r}
+apendice_c_filtrado <- apendice_c_bruto %>% filter_all(any_vars(!is.na(.))) %>% 
+  filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")
+         ) 
+
+
+```
+
+
+Agora a base tem `r nrow(apendice_c)` linhas, o que corresponde com o 645 municípios do estado de SP vezes 2 (pois a base tem dados de 2 anos).
+
+
+
+```{r}
+apendice_c_filtrado %>% arrange(-carga_poluidora_remancescente)
+```
+
+
+
+```{r}
+apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Rio Pinheiros'), ano == 2017) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
+
+
+apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Billings'), ano == 2018) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
+
+```
+
+
+
+
+
+
+é possível prever ictem a partir dos dados?
+
+```{r}
+library(tidymodels)
+especificacao_lm <- linear_reg() %>%
+  set_engine("lm") %>% 
+  set_mode("regression")
+
+
+modelo_linear <- especificacao_lm %>% 
+  fit(carga_poluidora_potencial ~ pop_urbana, data = apendice_c_filtrado)
+
+
+summary(modelo_linear$fit)
+
+ggplot(apendice_c_filtrado, aes(x = pop_urbana, y = carga_poluidora_remancescente)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red")
+
+```
+
