@@ -117,22 +117,128 @@ Agora a base tem `r nrow(apendice_c)` linhas, o que corresponde com o 645 munic�
 
 
 ```{r}
-apendice_c_filtrado %>% arrange(-carga_poluidora_remancescente)
+# apendice_c_filtrado %>% arrange(-carga_poluidora_remancescente)
 ```
 
 
 
 ```{r}
-apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Rio Pinheiros'), ano == 2017) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
-
-
-apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Billings'), ano == 2018) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
+# apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Rio Pinheiros'), ano == 2017) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
+# 
+# 
+# apendice_c_filtrado %>% filter(str_detect(corpo_receptor, 'Billings'), ano == 2018) %>% arrange(-pop_urbana) %>% select(carga_poluidora_remancescente) %>% summarise(sum(carga_poluidora_remancescente))
 
 ```
 
 
 
 
+
+# ------
+```{r}
+library(geobr)
+estado_sp <- geobr::read_state(code_state = 35)
+muni_sp <- read_municipality(code_muni= "SP", year=2018)
+
+```
+
+```{r}
+
+muni_sp_clean <-
+  muni_sp %>% mutate(
+    municipio = stringr::str_to_upper(name_muni),
+    municipio = iconv(municipio, from = 'UTF-8', to = 'ASCII//TRANSLIT'),
+    municipio = str_replace_all(municipio, "[^[:alnum:]]", " "),
+    municipio = str_replace_all(municipio, "SAO LUIS DO PARAITINGA", "SAO LUIZ DO PARAITINGA")
+  )
+
+
+dados_2018 <-
+  apendice_c_filtrado %>% filter(ano == 2018) %>% mutate(
+    municipio = stringr::str_to_upper(municipio),
+    municipio = iconv(municipio, from = 'UTF-8', to = 'ASCII//TRANSLIT'),
+    municipio = str_replace_all(municipio, "[^[:alnum:]]", " "),
+    municipio = str_replace_all(municipio, "SAO LUIS DO PARAITINGA", "SAO LUIZ DO PARAITINGA")
+  )
+
+
+
+ mapa_2018 <- dplyr::full_join(muni_sp_clean, dados_2018) # 
+```
+
+# - 
+
+
+
+
+```{r}
+library(readr)
+mmp <- read_csv("dados_mmp/mmp-daee-emplasa.csv") %>% janitor::clean_names()
+
+
+mmp_daee <- mmp %>% filter(recorte %in% c("EMPLASA e DAEE", "DAEE"))
+```
+
+
+```{r}
+
+# PROBLEMA AQUI \r\n
+
+
+mapa_2018_mmp_daee <- right_join(mapa_2018, mmp_daee, by  = c("code_muni" = "codigo_ibge"))
+
+
+mapa_2018_mmp_daee %>%
+ # filter(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi == "05 - Piracicaba/Capivari/Jundiaí\r\n")
+  mutate(
+#  nome_ugrhi = stringr::str_remove_all(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi, "\r\n")
+  nome_ugrhi =  case_when(
+    unidade_de_gerenciamento_de_recursos_hidricos_ugrhi == "05 - Piracicaba/Capivari/Jundiaí\r\n" ~ "05 - Piracicaba/Capivari/Jundiaí",
+    TRUE ~ unidade_de_gerenciamento_de_recursos_hidricos_ugrhi
+  )
+) %>% 
+
+  
+  count(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)
+```
+
+
+# - 
+
+```{r}
+no_axis <- theme(axis.title=element_blank(),
+                 axis.text=element_blank(),
+                 axis.ticks=element_blank())
+
+
+ggplot() +
+  geom_sf(data = mapa_2018_mmp_daee, aes(fill = unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)) +
+
+  theme_minimal() +
+  no_axis
+
+
+ggplot() +
+  geom_sf(
+    data = mapa_2018_mmp_daee,
+    aes(fill = carga_poluidora_remancescente, color = unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)
+  ) +
+  scale_fill_distiller(palette = "OrRd", direction = 1) +
+  
+  
+  #facet_wrap(~ ugrhi) +
+  theme_minimal() +
+  no_axis
+
+
+ggplot() +
+  geom_sf(data = mapa_2018_mmp_daee, aes(fill = pop_urbana))
+
+```
+
+
+
+# ----------
 
 
 é possível prever ictem a partir dos dados?
