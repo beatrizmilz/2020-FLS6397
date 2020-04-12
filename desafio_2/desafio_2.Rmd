@@ -6,14 +6,12 @@ output:
     code_folding: hide
     df_print: paged
   word_document: default
-subtitle: Entregar até 14h00 de 17/04/2020
+subtitle: "Entregar até 14h00 de 17/04/2020"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-	message = FALSE,
-	warning = FALSE
-)
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
 ```
 
 HTML compilado em: `r format(Sys.Date(), format="%d de %B de %Y")`
@@ -27,10 +25,10 @@ library(readr) # pacote usado para abrir a base
 
 library(janitor) # pacote usado para limpar a base
 
-library(flextable)
+library(flextable) # Pacotes usados para fazer tabela que, ao knitar para word, continuam bem formatadas
 library(officer)
 
-library(forcats)
+library(forcats) # pacote para lidar com factors
 ```
 
 ## Roteiro
@@ -39,8 +37,13 @@ library(forcats)
 
 ```{r}
 
-censoesc_2004_RO <- read_delim("https://raw.githubusercontent.com/JonnyPhillips/Ciencia_de_Dados/master/Desafios/CENSOESC_2004_RO.csv", 
-    "|", escape_double = FALSE, trim_ws = TRUE) %>% janitor::clean_names()
+censoesc_2004_RO <-
+  read_delim(
+    "https://raw.githubusercontent.com/JonnyPhillips/Ciencia_de_Dados/master/Desafios/CENSOESC_2004_RO.csv",
+    "|",
+    escape_double = FALSE,
+    trim_ws = TRUE
+  ) %>% janitor::clean_names()
 
 
 # glimpse(censoesc_2004_RO)
@@ -62,26 +65,29 @@ escolas_ativas <- censoesc_2004_RO %>% filter(codfunc == "Ativo")
 
 ```{r}
 # Quantas escolas ATIVAS há no estado?
-escolas_no_estado <- escolas_ativas %>% distinct(codigo_escola) %>% nrow()
+escolas_no_estado <-
+  escolas_ativas %>% distinct(codigo_escola) %>% nrow()
 
 
 # Quantas escolas por município?
 
-escolas_por_munic <- escolas_ativas %>% group_by(munic) %>% tally() %>% arrange(-n)
+escolas_por_munic <-
+  escolas_ativas %>% group_by(munic) %>% tally() %>% arrange(-n)
 
 # Qual é o município com o maior número de escolas?
 
 munic_com_mais_escolas <- escolas_por_munic %>% slice(1) %>% .[[1]]
 
-munic_com_mais_escolas_n <- escolas_por_munic %>% slice(1) %>% .[[2]]
+munic_com_mais_escolas_n <-
+  escolas_por_munic %>% slice(1) %>% .[[2]]
 
 ```
 
-**R: ** No estado de Roraima, em 2004, existiam `r escolas_no_estado` escolas ativas, sendo que o município `r  munic_com_mais_escolas` era o município com o maior número de escolas ativas (`r munic_com_mais_escolas_n`). A seguir, está representada a tabela \@ref(tab:escolasmunic), com as relação do número de escolas por município.
+**R: ** No estado de Roraima, em 2004, existiam `r escolas_no_estado` escolas ativas, sendo que o município `r  munic_com_mais_escolas` era o município com o maior número de escolas ativas (`r munic_com_mais_escolas_n`). A seguir, está representada na tabela a seguir, com as relação do número de escolas por município.
 
 ```{r escolasmunic}
-escolas_por_munic %>% flextable() %>%  
-  set_header_labels(munic = "Município", n = "Número de escolas ativas") %>% 
+escolas_por_munic %>% flextable() %>%
+  set_header_labels(munic = "Município", n = "Número de escolas ativas") %>%
   autofit() %>% theme_booktabs() %>% flextable::set_caption("Tabela de número de escolas ativas por município, em Roraima")
 ```
 
@@ -93,11 +99,11 @@ escolas_por_munic %>% flextable() %>%
 
 ```{r}
 escolas_por_munic %>%
-  add_row(munic = "Total", n = sum(.$n)) %>% 
-  flextable() %>%  
-  set_header_labels(munic = "Município", n = "Número de escolas ativas") %>% 
-  autofit() %>% theme_booktabs() %>% flextable::set_caption("Tabela de número de escolas ativas por município, em Roraima") %>% 
-   bold(i = 16, bold = TRUE)
+  add_row(munic = "Total", n = sum(.$n)) %>%
+  flextable() %>%
+  set_header_labels(munic = "Município", n = "Número de escolas ativas") %>%
+  autofit() %>% theme_booktabs() %>% flextable::set_caption("Tabela de número de escolas ativas por município, em Roraima") %>%
+  bold(i = 16, bold = TRUE)
 ```
 
 
@@ -106,18 +112,19 @@ escolas_por_munic %>%
 
 
 ```{r}
-n_prof_estado <- censoesc_2004_RO %>% summarise(total_prof = sum(profess, na.rm=TRUE)) %>% pull()
+n_prof_estado <-
+  escolas_ativas %>% summarise(total_prof = sum(profess, na.rm = TRUE)) %>% pull()
 ```
 
-Existem `r n_prof_estado` professores no estado de Roraima. A tabela a seguir representa o número de professores por município de Roraima:
+**R: ** Existem `r n_prof_estado` professores no estado de Roraima. A tabela a seguir representa o número de professores por município de Roraima:
 
 ```{r}
-censoesc_2004_RO %>% group_by(munic) %>% summarise(n = sum(profess, na.rm = TRUE)) %>% arrange(-n) %>% 
-  add_row(munic = "Total", n = sum(.$n)) %>% 
-  flextable() %>%  
-  set_header_labels(munic = "Município", n = "Número de professores") %>% 
-  autofit() %>% theme_booktabs() %>% flextable::set_caption("Tabela de número de professores por município, em Roraima") %>% 
-   bold(i = 16, bold = TRUE)
+escolas_ativas %>% group_by(munic) %>% summarise(n = sum(profess, na.rm = TRUE)) %>% arrange(-n) %>%
+  add_row(munic = "Total", n = sum(.$n)) %>%
+  flextable() %>%
+  set_header_labels(munic = "Município", n = "Número de professores") %>%
+  autofit() %>% theme_booktabs() %>% flextable::set_caption("Tabela de número de professores por município, em Roraima") %>%
+  bold(i = 16, bold = TRUE)
 ```
 
 
@@ -126,19 +133,17 @@ censoesc_2004_RO %>% group_by(munic) %>% summarise(n = sum(profess, na.rm = TRUE
 4. b) Qual é o porcentagem de professores entre todos os empregados (professores e funcionários) em cada município (inclua uma tabela)?
 
 ```{r}
-censoesc_2004_RO %>% group_by(munic) %>%
+escolas_ativas %>% group_by(munic) %>%
   summarise(
     prof = sum(profess, na.rm = T),
     total_func = sum(profess + funcion, na.rm = T)
   ) %>%
   mutate(porc = round(100 * prof / total_func, 1)) %>%
-  select(munic, porc) %>% 
-  arrange(porc) %>%  
+  select(munic, porc) %>%
+  arrange(porc) %>%
   flextable() %>%
   set_header_labels(munic = "Município", porc = "Porcentagem (%)") %>%
   autofit() %>% theme_booktabs() %>% flextable::set_caption("Porcentagem de professores entre todos os empregados por município, em Roraima") 
-
-
 ```
 
 
@@ -146,31 +151,31 @@ censoesc_2004_RO %>% group_by(munic) %>%
 5. Calcule a média e o desvio padrão do número de professores por escola em cada município (inclua uma tabela). Qual município há a maior variabilidade no número de professores por escola?
 
 ```{r}
-tabela_5 <- censoesc_2004_RO %>% group_by(munic) %>% summarise(
+tabela_5 <- escolas_ativas %>% group_by(munic) %>% summarise(
   media = mean(profess, na.rm = TRUE) %>% round(1),
-  desvpad = sd(profess, na.rm = TRUE)%>% round(1)
-) %>% 
+  desvpad = sd(profess, na.rm = TRUE) %>% round(1)
+) %>%
   arrange(-desvpad)
 
 munic_ex5 <- tabela_5 %>% slice(1) 
 
 ```
 
-O município onde há maior variabilidade no número de professores por escola é `r munic_ex5 %>% .[[1]] %>% stringr::str_to_title()` pois tem o maior desvio padrão: `r munic_ex5 %>% .[[3]]`. Abaixo está a tabela com os valores para todos os municípios em Roraima:
+**R: ** O município onde há maior variabilidade no número de professores por escola é `r munic_ex5 %>% .[[1]] %>% stringr::str_to_title()` pois tem o maior desvio padrão: `r munic_ex5 %>% .[[3]]`. Abaixo está a tabela com os valores para todos os municípios em Roraima:
 
 ```{r}
-tabela_5  %>%  
+tabela_5  %>%
   flextable() %>%
-  set_header_labels(munic = "Município", media = "Média", desvpad = "Desvio Padrão") %>%
+  set_header_labels(munic = "Município",
+                    media = "Média",
+                    desvpad = "Desvio Padrão") %>%
   autofit() %>% theme_booktabs()
-
-
 ```
 
 6. Quantos professores trabalham em cada uma das redes federais, estaduais, municipais e particulares (a variável DEP)? Calcule o porcentagem de professores em cada rede (inclua uma tabela).
 
 ```{r}
-censoesc_2004_RO %>% group_by(dep) %>% summarise(n_prof = sum(profess, na.rm = TRUE)) %>% arrange(-n_prof) %>% 
+escolas_ativas %>% group_by(dep) %>% summarise(n_prof = sum(profess, na.rm = TRUE)) %>% arrange(-n_prof) %>%
   
   mutate(porc = round(100 * n_prof / sum(n_prof), 1)) %>%   flextable() %>%
   set_header_labels(dep = "Rede de ensino", n_prof = "Número de professores(as)", porc = "Porcentagem (%)") %>%
@@ -183,27 +188,29 @@ censoesc_2004_RO %>% group_by(dep) %>% summarise(n_prof = sum(profess, na.rm = T
 7. Qual é o porcentagem de escolas com laboratório de informático, por município (inclua uma tabela)? Qual é o nome do município com o maior porcentagem de escolas com laboratório de informático?
 
 ```{r}
-tabela_7 <- censoesc_2004_RO %>% group_by(munic) %>%
-  summarise(
-    total_escola = n(),
-    total_lab = sum(lab_info, na.rm = TRUE)
-    )%>% mutate(porc = round(100 * total_lab / total_escola, 2)) %>% 
+tabela_7 <- escolas_ativas %>% group_by(munic) %>%
+  summarise(total_escola = n(),
+            total_lab = sum(lab_info, na.rm = TRUE)) %>% mutate(porc = round(100 * total_lab / total_escola, 2)) %>%
   
   arrange(-porc)
 
 
 munic_ex7 <- tabela_7 %>% slice(1)
 ```
-No município de `r munic_ex7 %>% .[[1]] %>% stringr::str_to_title()` , `r munic_ex7 %>% .[[4]]` % das escolas tem laboratório de informática, sendo que este município tem a maior porcentagem entre os municípios de Roraima.
+
+
+**R: ** No município de `r munic_ex7 %>% .[[1]] %>% stringr::str_to_title()` , `r munic_ex7 %>% .[[4]]` % das escolas tem laboratório de informática, sendo que este município tem a maior porcentagem entre os municípios de Roraima.
 
 ```{r}
-tabela_7  %>%  
+tabela_7  %>%
   flextable() %>%
-  set_header_labels(munic = "Município", porc = "Porcentagem (%)",
-                    total_escola = "Número total de escolas", total_lab = "Número de escolas com laboratório de informática") %>%
+  set_header_labels(
+    munic = "Município",
+    porc = "Porcentagem (%)",
+    total_escola = "Número total de escolas",
+    total_lab = "Número de escolas com laboratório de informática"
+  ) %>%
   autofit() %>% theme_booktabs()
-
-
 ```
 
 
@@ -212,8 +219,13 @@ tabela_7  %>%
 8. a) Vire o banco de dados do formato largo para o formato longo, para que as quatro variáveis VDG1CA, VDG1C1, VDG1C3, VDG1C4 se tornam uma variável que descreve o nível de ensinamento do professor, e uma outra variável que descreve o número de professores.
 
 ```{r}
-censo_longer <- censoesc_2004_RO %>% pivot_longer(cols = c("vdg1ca","vdg1c1","vdg1c3","vdg1c4"), names_to = "nivel_ensinamento", values_to = "n_prof")
-censo_longer
+censo_longer <-
+  escolas_ativas %>% pivot_longer(
+    cols = c("vdg1ca", "vdg1c1", "vdg1c3", "vdg1c4"),
+    names_to = "nivel_ensinamento",
+    values_to = "n_prof"
+  )
+censo_longer %>% head() %>% knitr::kable()
 ```
 
 
@@ -223,22 +235,29 @@ censo_longer
 censo_longer <- censo_longer %>%  mutate(
   nivel_ensinamento = forcats::fct_recode(
     nivel_ensinamento,
-     Creche = "vdg1ca",
+    Creche = "vdg1ca",
     `Pré-escola` = "vdg1c1",
-     Fundamental = "vdg1c3",
-     `Médio` = "vdg1c4"
+    Fundamental = "vdg1c3",
+    `Médio` = "vdg1c4"
   ),
   
-  nivel_ensinamento = forcats::fct_relevel( nivel_ensinamento, "Creche", "Pré-escola", "Fundamental", "Médio")
+  nivel_ensinamento = forcats::fct_relevel(
+    nivel_ensinamento,
+    "Creche",
+    "Pré-escola",
+    "Fundamental",
+    "Médio"
+  )
 ) 
 
+censo_longer %>% head() %>% knitr::kable()
 ```
 
 8. c) Resuma o número de professores por nível de ensinamento no estado inteiro.
 
 ```{r}
-censo_longer %>% group_by(nivel_ensinamento) %>% summarise(n_prof = sum(n_prof, na.rm = T)) %>% 
-    flextable() %>%
+censo_longer %>% group_by(nivel_ensinamento) %>% summarise(n_prof = sum(n_prof, na.rm = T)) %>%
+  flextable() %>%
   set_header_labels(nivel_ensinamento = "Nivel de ensinamento", n_prof = "Número de Professores(as)") %>%
   autofit() %>% theme_booktabs()
 ```
@@ -246,43 +265,126 @@ censo_longer %>% group_by(nivel_ensinamento) %>% summarise(n_prof = sum(n_prof, 
 
 9. Usando o banco de dados ‘longo’ criado na questão 8:
 
-9. a) Calcule a média e o total do número de professores em cada nível de ensinamento em cada município (inclua uma tabela) - *achei confuso*
+9. a) Calcule a média e o total do número de professores em cada nível de ensinamento em cada município (inclua uma tabela).
 
 ```{r}
-censo_longer %>% group_by(munic, nivel_ensinamento) %>% summarise(
-  media = mean(n_prof, na.rm = TRUE) %>% round(1),
-  total = n()
-) %>% knitr::kable()
+censo_longer %>% group_by(munic, nivel_ensinamento) %>% summarise(prof_media = round(mean(n_prof, na.rm = TRUE), 2),
+                                                                  prof_total = sum(n_prof, na.rm = TRUE)) %>%
+  flextable() %>%
+  set_header_labels(
+    munic = "Município",
+    nivel_ensinamento = "Nivel de ensinamento",
+    prof_total = "Número total de Professores(as)",
+    prof_media = "Média do número de professores(as)"
+  ) %>%
+  autofit() %>% theme_booktabs()
 ```
 
 
 
-9. b) Calcule o porcentagem dos professores em cada nível de ensinamento, por município, em uma tabela, e o município com o maior porcentagem dos seus Professores alocado à nível Fundamental
+9. b) Calcule o porcentagem dos professores em cada nível de ensinamento, por município, em uma tabela, e o município com o maior porcentagem dos seus Professores alocado à nível Fundamental. 
 
-9. c) Calcule o porcentagem dos professores em cada município, por nível de ensinamento, em uma tabela, e o município com o maior porcentagem de Professores de Ensino Fundamental.
+```{r}
+tabela_9b <- censo_longer %>% group_by(munic, nivel_ensinamento) %>% 
+  summarise(n_prof_nivel = sum(n_prof, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(munic) %>% 
+mutate(n_prof_total_munic = sum(n_prof_nivel),
+            porc = round(100 * n_prof_nivel/n_prof_total_munic, 2))
 
+tabela_9b %>% select(-n_prof_nivel, -n_prof_total_munic)  %>% flextable() %>%
+  set_header_labels(munic = "Município", nivel_ensinamento = "Nivel de Ensino", porc = "Porcentagem") %>%
+  autofit() %>% theme_booktabs()
+
+
+resposta_9b <- tabela_9b %>% filter(nivel_ensinamento == "Fundamental") %>% arrange(-porc) %>% .[[1,1]]
+
+
+```
+**R: ** O município com o maior porcentagem dos seus Professores alocado à nível Fundamental, em Roraima, é `r resposta_9b`.
+
+
+9. c) Calcule o porcentagem dos professores em cada município, por nível de ensinamento, em uma tabela, e o município com o maior porcentagem de Professores de Ensino Fundamental. 
+
+```{r}
+
+tabela_9c <- censo_longer %>% group_by(nivel_ensinamento, munic) %>% 
+  summarise(n_prof_nivel = sum(n_prof, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(nivel_ensinamento) %>% 
+mutate(n_prof_total = sum(n_prof_nivel),
+            porc = round(100 * n_prof_nivel/n_prof_total, 2))
+
+tabela_9c %>% select(-n_prof_nivel, -n_prof_total)  %>% flextable() %>%
+  set_header_labels(munic = "Município", nivel_ensinamento = "Nivel de Ensino", porc = "Porcentagem") %>%
+  autofit() %>% theme_booktabs()
+
+
+resposta_9c <- tabela_9c %>% filter(nivel_ensinamento == "Fundamental") %>% arrange(-porc) %>% .[[1,1]]
+```
+**R: ** O município com o maior porcentagem de Professores de Ensino Fundamental, em Roraima, é `r resposta_9c`.
 
 10. Voltando para o seu banco de dados ‘largo’, gere uma amostra aleatória de duas escolas estaduais em cada município. Mostre os resultados numa tabela.
 
 ```{r}
-censoesc_2004_RO %>% group_by(munic) %>% sample_n(2) %>% knitr::kable()
+escolas_ativas %>%
+  filter(dep == "Estadual") %>%
+  group_by(munic) %>%
+  sample_n(2) %>% select( munic, codigo_escola) %>%
+  flextable() %>%
+  set_header_labels(codigo_escola = "Código da Escola", munic = "Município") %>%
+  autofit() %>% theme_booktabs()
 ```
 
 
 11. Agora, queremos gerar uma tabela com nomes dos municípios nas linhas e rede (Estadual, Municipal, Federal, Particular; variável DEP) nas colunas. Nas células, colocamos o número de escolas de cada rede em cada município. Há vários jeitos de realizar isso, mas vamos seguir os passos abaixo:
 
-
-11. a) Calcule o número de escolas por município e rede. Todas as redes existem em todos os município?
+**OBS: **Mudei a ordem do exercício. Fazia mais sentido para mim transformar as colunas em fatores antes de usar o group_by.
 
 
 11. b) Transforme as variáveis do município e rede em fatores.
+
+```{r}
+escolas_11 <-
+  escolas_ativas %>% mutate(munic = as.factor(munic), dep = as.factor(dep))
+```
+
+
+11. a) Calcule o número de escolas por município e rede. Todas as redes existem em todos os município?
+
+```{r}
+escolas_11 <-
+  escolas_11 %>% group_by(munic, dep) %>% summarise(numero_escolas = n())
+```
+
+**R: ** Não.
 
 
 11. c) Use complete (de Tutorial 3) para criar uma tabela ‘completa’ com todas as combinações de município e rede possível, mesmo que não existe uma rede específica num município específico. Preenche os valores NA com ‘0’, porque já sabemos que não temos escolas nestes casos.
 
 
+```{r}
+# escolas_11 <- escolas_11 %>% complete(munic, dep,  fill=list(numero_escolas = 0))      # Não fiz essa etapa, tem um argumento na função pivot_wider() que preenche os valores NA.
+```
+
+
 11. d) Use uma função de pivot para virar o tibble e gerar o tamanho de tabela desejada (municípios nas linhas, redes nas colunas).
+
+```{r}
+escolas_11 %>%
+  pivot_wider(
+    id_cols = c(munic),
+    names_from = dep,
+    values_from = numero_escolas,
+    values_fill = list(numero_escolas = 0)
+  ) %>%
+  flextable() %>%
+  set_header_labels(munic = "Município") %>%
+  autofit() %>% theme_booktabs()
+```
 
 
 12. Para as tabelas que você produziu acima, volte para gerar tabelas estáticos bem formatados com kable(). Verifique que todas as tabelas têm um título, as colunas apropriadas, formatação de números, etc.
+
+**R:** Utilizei outro pacote para realizar as tabelas. Queria experimentar algum que gerasse um bom output com word.
 
