@@ -1,10 +1,10 @@
 ---
-title: "Untitled"
+title: "Anotações do projeto final"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message =  FALSE)
 ```
 
 
@@ -26,7 +26,8 @@ library(tidyverse)
 
 para 2016: não foi disponibilizado como tabela, e sim como imagem.
 
-  
+tutorial legal: https://www.curso-r.com/blog/2017-11-23-union-sf/
+
 ```{r}
 
 dados_2018 <- read_csv(
@@ -112,7 +113,7 @@ apendice_c_filtrado <- apendice_c_bruto %>% filter_all(any_vars(!is.na(.))) %>%
 ```
 
 
-Agora a base tem `r nrow(apendice_c)` linhas, o que corresponde com o 645 municípios do estado de SP vezes 2 (pois a base tem dados de 2 anos).
+Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde com o 645 municípios do estado de SP vezes 2 (pois a base tem dados de 2 anos).
 
 
 
@@ -135,21 +136,29 @@ Agora a base tem `r nrow(apendice_c)` linhas, o que corresponde com o 645 munic�
 
 
 # ------
-```{r}
+```{r include=FALSE}
 library(geobr)
 estado_sp <- geobr::read_state(code_state = 35)
+estado_mg <- geobr::read_state(code_state = "MG")
 muni_sp <- read_municipality(code_muni= "SP", year=2018)
+muni_mg <- read_municipality(code_muni= "MG", year=2018)
+
+muni_sp_mg <- rbind(muni_sp, muni_mg)
 
 ```
 
 ```{r}
 
-muni_sp_clean <-
-  muni_sp %>% mutate(
+muni_sp_mg_clean <-
+  muni_sp_mg %>% mutate(
     municipio = stringr::str_to_upper(name_muni),
     municipio = iconv(municipio, from = 'UTF-8', to = 'ASCII//TRANSLIT'),
     municipio = str_replace_all(municipio, "[^[:alnum:]]", " "),
-    municipio = str_replace_all(municipio, "SAO LUIS DO PARAITINGA", "SAO LUIZ DO PARAITINGA")
+    municipio = str_replace_all(municipio, "SAO LUIS DO PARAITINGA", "SAO LUIZ DO PARAITINGA"),
+    municipio = case_when(
+      abbrev_state == "MG" ~ paste0("MG - ", municipio),
+      TRUE ~ municipio
+    )
   )
 
 
@@ -163,7 +172,7 @@ dados_2018 <-
 
 
 
- mapa_2018 <- dplyr::full_join(muni_sp_clean, dados_2018) # 
+ mapa_2018 <- dplyr::full_join(muni_sp_mg_clean, dados_2018) # 
 ```
 
 # - 
@@ -173,7 +182,15 @@ dados_2018 <-
 
 ```{r}
 library(readr)
-mmp <- read_csv("dados_mmp/mmp-daee-emplasa.csv") %>% janitor::clean_names()
+mmp <-
+  read_csv("dados_mmp/mmp-daee-emplasa.csv") %>% janitor::clean_names() %>%  mutate(
+    #  nome_ugrhi = stringr::str_remove_all(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi, "\r\n")
+    nome_ugrhi =  case_when(
+      startsWith(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi, "05 - ") ~ "05 - Piracicaba/Capivari/Jundiaí",
+      unidade_de_gerenciamento_de_recursos_hidricos_ugrhi == "MG" ~ "05 - Piracicaba/Capivari/Jundiaí",
+      TRUE ~ unidade_de_gerenciamento_de_recursos_hidricos_ugrhi
+    )
+  )
 
 
 mmp_daee <- mmp %>% filter(recorte %in% c("EMPLASA e DAEE", "DAEE"))
@@ -181,62 +198,141 @@ mmp_daee <- mmp %>% filter(recorte %in% c("EMPLASA e DAEE", "DAEE"))
 
 
 ```{r}
-
-# PROBLEMA AQUI \r\n
-
-
 mapa_2018_mmp_daee <- right_join(mapa_2018, mmp_daee, by  = c("code_muni" = "codigo_ibge"))
 
 
 mapa_2018_mmp_daee %>%
- # filter(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi == "05 - Piracicaba/Capivari/Jundiaí\r\n")
-  mutate(
-#  nome_ugrhi = stringr::str_remove_all(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi, "\r\n")
-  nome_ugrhi =  case_when(
-    unidade_de_gerenciamento_de_recursos_hidricos_ugrhi == "05 - Piracicaba/Capivari/Jundiaí\r\n" ~ "05 - Piracicaba/Capivari/Jundiaí",
-    TRUE ~ unidade_de_gerenciamento_de_recursos_hidricos_ugrhi
-  )
-) %>% 
+  count(nome_ugrhi)
+```
 
+
+```{r}
+ mapa_2018_mmp_daee  %>% group_by(nome_ugrhi)%>%  
   
-  count(unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)
+  summarise(
+    
+  ) %>% ungroup() %>% 
+ ggplot()+ geom_sf()
+
+
+
+
 ```
 
 
 # - 
 
 ```{r}
+library(ggthemes)
 no_axis <- theme(axis.title=element_blank(),
                  axis.text=element_blank(),
                  axis.ticks=element_blank())
 
 
 ggplot() +
-  geom_sf(data = mapa_2018_mmp_daee, aes(fill = unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)) +
-
+  geom_sf(data=estado_sp, fill = "gray")+
+#  geom_sf(data=estado_mg, fill = "gray")+
+  geom_sf(data = mapa_2018_mmp_daee, aes(fill = nome_ugrhi)) +
   theme_minimal() +
-  no_axis
+  labs(fill = "Nome da Bacia")
+```
 
+```{r} 
+mapa_2018_mmp_daee$carga_poluidora_remancescente_color <-
+  cut(mapa_2018_mmp_daee$carga_poluidora_remancescente,
+     
+      
+      # breaks = BAMMtools::getJenksBreaks(mapa_2018_mmp_daee$carga_poluidora_remancescente, k = 10)
+        
+        c(
+        0,
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[2]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[3]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[4]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[5]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[6]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[7]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[8]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[9]],
+        quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[10]],
+        max(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T)
+      )
+
+      , dig.lab = 10
+      
+      ) 
+
+
+#BAMMtools::getJenksBreaks(mapa_2018_mmp_daee$carga_poluidora_remancescente, k = 10)
 
 ggplot() +
   geom_sf(
     data = mapa_2018_mmp_daee,
-    aes(fill = carga_poluidora_remancescente, color = unidade_de_gerenciamento_de_recursos_hidricos_ugrhi)
+    aes(fill = carga_poluidora_remancescente_color)
   ) +
-  scale_fill_distiller(palette = "OrRd", direction = 1) +
-  
-  
-  #facet_wrap(~ ugrhi) +
   theme_minimal() +
-  no_axis
+scale_fill_viridis_d(direction = -1)+
+  labs(
+    fill = "Carga poluidora \n remanescente \n (kg DBO/dia)"
+      
+  )
 
-
-ggplot() +
-  geom_sf(data = mapa_2018_mmp_daee, aes(fill = pop_urbana))
 
 ```
 
+```{r} 
+mapa_2018_mmp_daee$carga_poluidora_remancescente_color <-
+  cut(mapa_2018_mmp_daee$carga_poluidora_remancescente,
+     
+      
+       breaks = BAMMtools::getJenksBreaks(mapa_2018_mmp_daee$carga_poluidora_remancescente, k = 10)
+      #   
+      #   c(
+      #   0,
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[2]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[3]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[4]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[5]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[6]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[7]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[8]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[9]],
+      #   quantile(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T, probs = seq(0, 1, 0.1))[[10]],
+      #   max(mapa_2018_mmp_daee$carga_poluidora_remancescente, na.rm = T)
+      # )
 
+      , dig.lab = 10
+      
+      ) 
+
+
+#BAMMtools::getJenksBreaks(mapa_2018_mmp_daee$carga_poluidora_remancescente, k = 10)
+
+ggplot() +
+  geom_sf(
+    data = mapa_2018_mmp_daee,
+    aes(fill = carga_poluidora_remancescente_color)
+  ) +
+  theme_minimal() +
+scale_fill_viridis_d(direction = -1)+
+  labs(
+    fill = "Carga poluidora \n remanescente \n (kg DBO/dia)"
+      
+  )
+
+
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = mapa_2018_mmp_daee, aes(fill = ictem))+
+  theme_minimal() +
+  scale_fill_continuous(type = "viridis")+
+#  facet_wrap(~nome_ugrhi)  +
+  no_axis+
+  theme_map()+
+  theme(legend.position="right")
+```
 
 # ----------
 
