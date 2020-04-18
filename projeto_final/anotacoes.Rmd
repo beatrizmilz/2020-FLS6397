@@ -138,6 +138,7 @@ Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde com o 6
 # ------
 ```{r include=FALSE}
 library(geobr)
+  brasil_geo <- geobr::read_country()
 estado_sp <- geobr::read_state(code_state = 35)
 estado_mg <- geobr::read_state(code_state = "MG")
 muni_sp <- read_municipality(code_muni= "SP", year=2018)
@@ -206,23 +207,11 @@ mapa_2018_mmp_daee %>%
 ```
 
 
-```{r}
- mapa_2018_mmp_daee  %>% group_by(nome_ugrhi)%>%  
-  
-  summarise(
-    
-  ) %>% ungroup() %>% 
- ggplot()+ geom_sf()
-
-
-
-
-```
-
 
 # - 
 
 ```{r}
+library(ggspatial)
 library(ggthemes)
 no_axis <- theme(axis.title=element_blank(),
                  axis.text=element_blank(),
@@ -230,11 +219,47 @@ no_axis <- theme(axis.title=element_blank(),
 
 
 ggplot() +
-  geom_sf(data=estado_sp, fill = "gray")+
-#  geom_sf(data=estado_mg, fill = "gray")+
-  geom_sf(data = mapa_2018_mmp_daee, aes(fill = nome_ugrhi)) +
-  theme_minimal() +
-  labs(fill = "Nome da Bacia")
+  geom_sf() +
+    # geom_sf(data = brasil_geo,
+    #       fill = "lightgray",
+    #       show.legend = TRUE) +
+  geom_sf(data = estado_sp,
+          fill = "lightgray",
+          show.legend = TRUE) +
+  #  geom_sf(data=estado_mg, fill = "gray")+
+  geom_sf(data = mapa_2018_mmp_daee, aes(fill = nome_ugrhi), color = NA) +
+      geom_sf(data = sp_ugrhi, fill = NA, alpha = 0.5)+
+      
+      # theme_minimal() +
+      labs(fill = "UGRHI",
+           x = "Longitude", y = "Latitude") +
+      annotation_scale(location = "bl", width_hint = 0.30) +
+      annotation_north_arrow(
+        location = "bl",
+        which_north = "true",
+        height = unit(1, "cm"),
+        width = unit(1, "cm"),
+        pad_x = unit(0.5, "in"),
+        pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering
+      ) +
+    theme_bw()+
+      theme(
+        panel.grid.major = element_line(
+          color = gray(0.9),
+          linetype = "dashed",
+          size = 0.1
+           ),
+        panel.background = element_rect(fill = "white")
+      ) +
+theme(axis.text.y = element_text(angle = 90, hjust = 0.5, size = 8),
+      axis.text.x = element_text( size = 8),
+      axis.title.y = element_text(size = rel(0.8)),
+      axis.title.x = element_text(size = rel(0.8))
+      )+
+      ggsave("mapa_sp_ughri.jpeg", device = "jpeg", dpi = 600, width = 10
+             , height = 5)
+    
 ```
 
 ```{r} 
