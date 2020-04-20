@@ -60,10 +60,19 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
     - [ ]  Capítulo 4
     - [ ]  Capítulo 5
     - [ ]  Capítulo 6    
+    
+    
+- [Aula 6](https://jonnyphillips.github.io/Ciencia_de_Dados/Graficos.html):
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_6/aula_6.html)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_6/aula_6_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
+  - Leituras - R 4 Data Science:
+    - [ ]  Capítulo 13
+
 
 ## Desafios
 
 - [x] [Desafio 1](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_1.html) - Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_1/desafio_1.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_1/desafio_1.Rmd)
 
 
-- [ ] [Desafio 2](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_2.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.Rmd)
+- [x] [Desafio 2](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_2.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.Rmd)

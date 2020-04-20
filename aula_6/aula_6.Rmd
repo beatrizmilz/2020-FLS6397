@@ -1,0 +1,489 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "17/04/2020"
+output:
+  html_document: null
+ # word_document: default
+code_folding: hide
+title: "Aula 6 - Visualização de dados"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+## Gráficos
+### A Gramática de Gráficos
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(nycflights13)
+```
+
+```{r}
+flights %>% filter(dest=="DEN") %>%
+  ggplot() + 
+  geom_point(aes(x=dep_time, y=dep_delay), size=1)
+```
+
+### Estéticas
+
+### Geometrias
+
+### Geometria para uma variável discreta (o número de observações por grupo)
+
+```{r}
+flights %>% ggplot() +
+  geom_bar(aes(x=origin))
+```
+
+### Habilidade Básica de Programação: Apresentando Gráficos no relatório final
+
+```{r, fig.height=2, fig.width=2}
+flights %>% ggplot() +
+  geom_bar(aes(x=origin))
+```
+
+### Gráficos com uma variável contínua - Gráficos de histogramas
+
+```{r}
+flights <- flights %>% 
+  mutate(velocidade=distance/air_time) 
+
+flights %>% 
+  ggplot() +
+  geom_histogram(aes(x=velocidade))
+```
+
+
+
+### Parâmetros fixos
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_histogram(aes(x=velocidade), binwidth=1)
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_histogram(aes(x=velocidade), binwidth=1, colour="black", fill="orange")
+```
+
+### Gráficos com uma variável contínua - Gráficos de densidade
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade))
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade), colour="blue")
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade), colour="blue", fill="blue")
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade), colour="blue", fill="blue", alpha=0.2)
+```
+
+```{r}
+media_velocidade <- flights %>% summarize(media_velocidade=mean(velocidade,na.rm=T)) %>%
+  pull(media_velocidade)
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade), colour="blue", fill="blue", alpha=0.2) +
+  geom_vline(aes(xintercept = media_velocidade))
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=velocidade), colour="blue", fill="blue", alpha=0.2) +
+  geom_vline(aes(xintercept = media_velocidade), linetype="dashed", colour="red")
+```
+
+### Gráficos com uma variável contínua e uma variável discreta
+
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_histogram(aes(x=dep_time, fill=origin))
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_histogram(aes(x=dep_time, fill=origin), 
+                 position = "dodge", binwidth=200)
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=dep_time, colour=origin))
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=dep_time, fill=origin))
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=dep_time, fill=origin), alpha=0.5)
+```
+
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=dep_time, colour=origin, fill=origin), alpha=0.5)
+```
+
+
+### Gráficos com uma variável contínua e uma variável discreta - Gráficos de boxplot
+
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_boxplot(aes(x=origin, y=dep_time))
+```
+
+
+
+
+### Gráficos com um valor único por uma variável discreta - Gráficos de coluna
+
+```{r}
+flights %>% group_by(origin) %>% 
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>% 
+  ggplot() +
+  geom_col(aes(x=origin, y=dep_delay_media))
+```
+
+
+### Gráficos de duas variáveis contínuas
+
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = distance, y = air_time))
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = distance, y = air_time), size=0.1, color="blue", shape=2)
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = distance, y =air_time), size=0.1) +
+  geom_smooth(aes(x = distance, y = air_time), method = "lm", se = FALSE)
+```
+
+```{r}
+flights %>%# sample_n(50) %>% 
+  ggplot() + 
+  geom_point(aes(x = distance, y = air_time), size=0.1) +
+  geom_smooth(aes(x = distance, y = air_time), method = "lm")
+```
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time), size=0.1) +
+  geom_smooth(aes(x = distance, y = air_time), method = "loess")
+```
+
+### Gráficos de três ou mais variáveis
+
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay, size=distance))
+```
+
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay, colour=origin))
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay, shape=origin))
+```
+
+### Múltiplos Gráficos (facet_grid)
+
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay)) + 
+  facet_grid(cols=vars(origin))
+```
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay)) + 
+  facet_grid(rows=vars(origin))
+```
+
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() + 
+  geom_point(aes(x = dep_time, y = dep_delay)) + 
+  facet_grid(rows=vars(month), cols=vars(origin))
+```
+
+### Gráficos de Linha
+
+```{r}
+flights %>% 
+  mutate(month=factor(month, levels=1:12, ordered=TRUE)) %>%
+  group_by(month) %>%
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>%
+  ggplot() +
+  geom_line(aes(x=month, y=dep_delay_media), group=1)
+```
+
+
+```{r}
+flights %>% 
+  mutate(month=factor(month, levels=1:12, ordered=TRUE)) %>%
+  group_by(month, origin) %>%
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>%
+  ggplot() +
+  geom_line(aes(x=month, y=dep_delay_media, group=origin))
+```
+
+```{r}
+flights %>% 
+  mutate(month=factor(month, levels=1:12, ordered=TRUE)) %>%
+  group_by(month, origin) %>%
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>%
+  ggplot() +
+  geom_line(aes(x=month, y=dep_delay_media, group=origin, colour=origin))
+```
+
+### Gráfico de barras 100%
+
+
+```{r}
+flights %>% 
+  mutate(month=factor(month, levels=1:12, ordered=TRUE)) %>%
+  group_by(month, origin) %>%
+  summarize(dep_delay_total=sum(dep_delay,na.rm=T)) %>%
+  ggplot() +
+  geom_col(aes(x=month, y=dep_delay_total, fill=origin), position = "fill")
+```
+
+### Mais geometrias
+```{r}
+flights %>% sample_n(100) %>% 
+  ggplot() + 
+  geom_text(aes(x = dep_time, y = dep_delay, label=dest))
+```
+
+
+
+
+```{r}
+flights %>% group_by(origin, month) %>% 
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>% 
+  ggplot() + 
+  geom_tile(aes(x = origin, y = month, fill=dep_delay_media))
+```
+
+
+
+```{r}
+flights %>% group_by(origin) %>%
+  summarize(dep_delay_total=sum(dep_delay, na.rm=T)) %>%
+  ggplot() + 
+  geom_col(aes(x="", y=dep_delay_total, fill=origin), position="fill")
+```
+
+
+
+```{r}
+flights %>% group_by(origin) %>%
+  summarize(dep_delay_total=sum(dep_delay, na.rm=T)) %>%
+  ggplot() + 
+  geom_col(aes(x="", y=dep_delay_total, fill=origin), position="fill") +
+  coord_polar(theta="y")
+```
+
+
+### Controlando cores com ‘scales’
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=dep_time))
+```
+
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=dep_time)) +
+  scale_color_gradient(low="#f7fcfd", high="#238b45" )
+```
+
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  scale_color_brewer(palette="Set2")
+```
+
+```{r}
+flights %>% group_by(origin, month) %>% 
+  summarize(dep_delay_media=mean(dep_delay,na.rm=T)) %>% 
+  ggplot() + 
+  geom_tile(aes(x = origin, y = month, fill=dep_delay_media)) +
+  scale_fill_gradient(low="#f7fcfd", high="#238b45")
+```
+
+
+
+
+```{r}
+flights %>% group_by(origin, month, carrier) %>% 
+  tally() %>% 
+  group_by(origin, month) %>%
+  filter(n==max(n)) %>% 
+  ggplot() + 
+  geom_tile(aes(x = origin, y = month, fill=carrier)) +
+  scale_fill_brewer(palette="Set2")
+```
+
+
+### Personalização de Gráficos além de geometria
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque")
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque") +
+  xlab("Distância") +
+  ylab("Duração")
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque") +
+  xlab("Distância") +
+  ylab("Duração") + 
+  theme(legend.position="bottom")
+```
+
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque") +
+  xlab("Distância") +
+  ylab("Duração") +
+    theme(axis.text.x = element_text(size=4),
+          axis.text.y = element_text(size=4),
+          axis.title.x = element_text(size=4),
+          axis.title.y = element_text(size=4))
+```
+
+```{r}
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque") +
+  xlab("Distância") +
+  ylab("Duração") +
+  theme_classic()
+```
+
+```{r}
+# install.packages("ggthemes")
+library(ggthemes)
+
+flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de voo, por aeroporto do Nova Iorque") +
+  xlab("Distância") +
+  ylab("Duração") +
+  theme_economist()
+```
+```{r}
+flights %>% ggplot() +
+  geom_bar(aes(x=origin))
+
+ggsave("flights_barplot.png")
+```
+
+
+### Gráficos interativas e animações
+
+
+```{r}
+library(plotly)
+
+graf_1 <- flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin)) +
+  ggtitle("Relação entre distância e duração de cada voo, por aeroporto do Nova Iorque em 2013") +
+  xlab("Distância") +
+  ylab("Duração") +
+  theme_classic() 
+
+graf_1 %>%
+  ggplotly()
+```
+
+```{r}
+graf_2 <- flights %>% sample_n(1000) %>% ggplot() + 
+  geom_point(aes(x = distance, y = air_time, color=origin, frame=month)) +
+  ggtitle("Relação entre distância e duração de cada voo, por aeroporto do Nova Iorque em 2013") +
+  xlab("Distância") +
+  ylab("Duração") +
+  theme_classic() 
+
+graf_2 %>%
+  ggplotly()
+```
+
