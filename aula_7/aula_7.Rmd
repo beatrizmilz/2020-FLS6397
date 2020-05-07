@@ -1,0 +1,165 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "24/04/2020"
+output:
+  html_document: null
+ # word_document: default
+code_folding: hide
+title: "Aula 7 - Juntando Bancos de Dados"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(nycflights13)
+```
+
+## Juntando Bancos de Dados
+
+```{r}
+planes
+
+flights
+```
+
+```{r}
+flights_JFK_ATL <- flights %>% filter(month==4 & day==22 & origin=="JFK" & dest=="ATL")
+
+flights_JFK_ATL %>% left_join(planes, by="tailnum")
+```
+
+__Estratégia 1__
+
+```{r}
+flights_por_aviao <- nycflights13::flights %>% 
+  group_by(tailnum) %>%
+  tally()
+
+planes_com_num_viagens <- planes %>% left_join(flights_por_aviao, by="tailnum")
+```
+
+__Estratégia 2__
+
+```{r}
+
+planes <- nycflights13::planes %>%
+  rename("year_fabricacao"="year")
+
+flights_com_planes <- flights %>% left_join(planes, by="tailnum")
+
+
+flights_com_planes %>% 
+  filter(dest=="GSO") %>% 
+  arrange(tailnum) %>%
+  select(tailnum, month, day, dep_time, manufacturer, year, year_fabricacao, model, seats)
+```
+
+
+
+```{r}
+flights_com_planes %>% 
+  group_by(year_fabricacao) %>%
+  tally() %>%
+  ggplot() +
+  geom_col(aes(x=year_fabricacao, y=n))
+```
+
+## Identificando Observações Faltantes
+
+```{r}
+flights %>% anti_join(planes, by="tailnum")
+```
+```{r}
+planes %>% anti_join(flights, by="tailnum")
+```
+
+
+## Juntando Bancos por Múltiplas Variáveis
+
+
+```{r}
+flights_weather <- flights %>% left_join(weather, c("origin", "year", "month", "day", "hour"))
+
+```
+
+```{r}
+flights_weather %>% ungroup() %>% 
+  top_n(1, wind_speed)
+```
+
+## Bancos e Dados Faltantes (right_join, inner_join, full_join, anti_join)
+
+
+```{r}
+flights_com_planes %>% 
+  filter(origin=="LGA" & dest=="ORD") %>%
+    select(month, day, dep_time, type, model, seats)
+```
+
+```{r}
+flights %>% inner_join(planes, by=c("tailnum"))
+```
+
+
+```{r}
+flights %>% left_join(airports, by = c("dest" = "faa"))
+```
+
+```{r}
+flights %>% 
+  left_join(airports %>% select(faa, name),                       by=c("dest" = "faa"))
+```
+
+```{r}
+flights %>% anti_join(airports, by=c("dest" = "faa"))
+airports %>% anti_join(flights, by=c("faa" = "dest"))
+```
+
+```{r}
+flights %>% right_join(airports, by=c("dest" = "faa"))
+```
+
+```{r}
+flights %>% full_join(airports, by=c("dest" = "faa"))
+```
+
+## Nesting data (nest, unnest)
+
+```{r}
+flights_nested <- flights %>% group_by(origin) %>%
+  nest()
+
+flights_nested
+```
+
+
+```{r}
+flights_nested %>% filter(origin=="EWR") %>%
+  pull(data)
+```
+
+
+```{r}
+flights_nested <- flights %>% group_by(origin, carrier) %>%
+  nest() %>%
+  arrange(carrier, origin)
+flights_nested
+```
+
+```{r}
+flights_nested %>% unnest()
+```
+
+```{r}
+flights %>% group_by(tailnum) %>%
+  nest() %>%
+  left_join(planes, by = c("tailnum")) %>%
+  rename("viagens" = "data")
+```
+

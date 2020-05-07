@@ -1,0 +1,195 @@
+---
+title: 'Desafio 3: Combinação e Visualização de Dados'
+author: "Beatriz Milz"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+  word_document: default
+subtitle: "Entregar até 14h00 de 08/05/2020"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+```
+
+HTML compilado em: `r format(Sys.Date(), format="%d de %B de %Y")`
+
+```{r}
+## Carregar pacotes
+
+library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
+library(readr)
+```
+
+
+## Roteiro
+
+1) Vamos trabalher de novo com os dados eleitorais do Tribunal Superior Eleitoral. Vá ao Repositório de Dados Eleitorais do TSE. O TSE disponibiliza dados sobre os resultados eleitorais separadamente dos dados sobre os candidatos.
+
+R: Recebido pelo professor por email.
+
+1) a) Na aba de ‘resultados’, faça o download do arquivo “Votação nominal por município e zona” para 2016 e descompacte-o.
+
+R: Recebido pelo professor por email.
+
+
+1) b) Na aba de ‘candidatos’, faça o download do arquivo “Candidatos” para 2016 e descompacte-o.
+
+R: Recebido pelo professor por email.
+
+
+1) c) Dos arquivos descompactados, abre os dois bancos para Roraima (RR) em R com os parâmetros apropriados (note que o formato é um pouco diferente dos arquivos no desafio 1). Para detalhes sobre as colunas, veja o parte apropriado do documento leiame.pdf nos arquivos.
+
+```{r}
+
+consulta_cand_2016_RR <- read_delim("dados/consulta_cand_2016_RR.csv", 
+    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"),  
+    col_types = cols(SQ_CANDIDATO = col_character(), SQ_COLIGACAO = col_character()),
+    trim_ws = TRUE)
+
+View(consulta_cand_2016_RR)
+```
+
+```{r}
+votacao_candidato_munzona_2016_RR <- read_delim("dados/votacao_candidato_munzona_2016_RR.csv", 
+    ";", escape_double = FALSE, col_types = cols(SQ_CANDIDATO = col_character(), SQ_COLIGACAO = col_character()), 
+    locale = locale(encoding = "ISO-8859-1"), 
+    trim_ws = TRUE)
+View(votacao_candidato_munzona_2016_RR)
+```
+
+2) Queremos analisar os resultados eleitorais baseado nas características dos candidatos, então precisamos juntar os dois bancos.
+
+2) a) Identifique a unidade de análise do banco de candidatos - o que repesenta cada observação/linha? Quais variáveis identificam cada linha exclusivamente? (Cuidado: o número do candidato (NR_CANDIDATO) não é único para cada candidato).
+
+Cada linha da base "consulta_cand_idato_2016_RR" representa um/uma candidato/a na eleição do ano de 2016, estado de Roraima. 
+
+A variável que identifica cada linha exclusivamente é SQ_CANDIDATO.
+
+```{r}
+consulta_cand_2016_RR$SQ_CANDIDATO %>% unique() %>% length()
+```
+
+
+2) b) Identifique a unidade de análise do banco de resultados - o que repesenta cada observação/linha? Quais variáveis identificam cada linha exclusivamente?
+
+Cada linha da base "votacao_candidato_munzona_2016_RR" representa os cadidatos por zona na eleição do ano de 2016, estado de Roraima. 
+
+As variáveis que identificam cada linha exclusivamente são SQ_CANDIDATO e NR_ZONA.
+
+```{r}
+votacao_candidato_munzona_2016_RR %>% select(SQ_CANDIDATO, NR_ZONA) %>% unique() %>% nrow()
+```
+
+2) c) Liste as variáveis que compõem os identificadores comuns para realizar a junção dos dois bancos.
+```{r}
+teste <- left_join(votacao_candidato_munzona_2016_RR, consulta_cand_2016_RR, by = "SQ_CANDIDATO")
+```
+
+
+2) d) Use anti_join para identificador se há resultados que faltam detalhes do seu candidato no banco de dados de candidatos.
+
+2) e) Use anti_join para identificador se há candidatos faltando no banco de dados de resultados. (Bonus: Investigando as colunas do resultado de anti_join, você pode identificar porque eles não existem no banco de resultados?).
+
+2) f) Não precisamos trabalhar com todas as colunas para a análise então para limpar os dados e deixar mais fácil entende-los, selecionar apenas as próximas colunas:
+
+  - Candidatos: SQ_CANDIDATO, NM_CANDIDATO, SG_PARTIDO, NR_IDADE_DATA_POSSE, DS_GENERO, DS_GRAU_INSTRUCAO, DS_COR_RACA
+
+  - Resultados: SQ_CANDIDATO, NM_MUNICIPIO, NR_ZONA, DS_CARGO, NR_TURNO, DS_CARGO, DS_SIT_TOT_TURNO, QT_VOTOS_NOMINAIS
+
+2*) Por algum motivo, queremos calcular um resumo do total de votos recebidos por cada candidato em todas as eleições de 2016 - todas as zonas, todos os turnos, etc.
+
+2*) a) Agregar o seu banco de resultados para ter uma linha por candidato resumindo o seu número de votos total.
+
+2*) b) Execute um join do tipo apropriado para criar uma tabela de todos os candidatos que se inscreveram para a eleição com os seus dados pessoais, incluindo o número de votos total calculado em (a).
+
+3) Execute um join do tipo apropriado para uma análise comparando as caractéristicas dos candidatos que correram e os seus resultados eleitorais.
+
+
+4) a) Filtre os seus dados juntados em Questão 3 para focar nas eleições para vereador.
+
+
+4) b) __[Omitida na versão inicial, exemplo de código fornecido]__ Resume os dados dos vereadores para agregar os dados por município (somando os dados das zonas eleitorais em cada município).
+
+```{r eval=FALSE, include=TRUE}
+combinado_vereador <- combinado_vereador %>% 
+  group_by(SQ_CANDIDATO, NM_MUNICIPIO, DS_CARGO, NR_TURNO, DS_SIT_TOT_TURNO, 
+           NM_CANDIDATO, SG_PARTIDO, NR_IDADE_DATA_POSSE, DS_GENERO, 
+           DS_GRAU_INSTRUCAO, DS_COR_RACA) %>%
+  summarize(QT_VOTOS_NOMINAIS=sum(QT_VOTOS_NOMINAIS, na.rm=T)) %>%
+  ungroup()
+```
+
+5) Para o nosso primeiro gráfico, vamos apresentar o número de candidatos para vereador por município, usando o banco de dados criado em questão 4.
+
+5) a) Escolhe um tipo de gráfico apropriado e crie o gráfico.
+
+5) b) Adicione um título ao seu gráfico, e rótulos nos eixos.
+
+5) c) Use o código da camada + theme(axis.text.x = element_text(angle = 90)) para virar o texto do município para deixar mais visível.
+
+5) Agora, a nossa questão de pesquisa é o número de candidatos por gênero (variável DS_GENERO) no estado inteiro, usando o banco de dados de vereadores de questão 4. Prepare um gráfico apropriado, com título, rótulos nos eixos e aplique um tema simples da sua escolha.
+
+
+6) a) Gere um gráfico apropriado que mostra o porcentagem de candidatos por gênero em cada município, usando o banco de dados de vereadores de questão 4.
+
+
+6) b) Formate o seu gráfico com títulos, rótulos nos eixos, virando o texto no eixo x, e ajuste a legenda para que ela fique abaixo do gráfico.
+
+
+7) a) Gere uma variável binário para os vereadores eleitos (da variável DS_SIT_TOT_TURNO), e calcule a taxa de sucesso (% eleito) de candidatos por município e gênero.
+
+7) b) Mostre um gráfico de barras da taxa de sucesso (% eleito) dos candidatos femininos por município, com formatação apropriada.
+
+7) c) Extende o seu gráfico para mostrar a taxa de sucesso de homens e mulheres lado a lado, por município.
+
+7) d) Qual é o município em que as mulheres têm uma maior taxa de sucesso que os homens?
+
+
+8) Gere um gráfico de ‘tile’, que mostra o número de candidatos por município e gênero. Aplique uma escala de cores apropriado da sua escolha. Formate o seu gráfico.
+
+9) a) Apresente um gráfico de histograma da idade dos candidatos (NR_IDADE_DATA_POSSE). Faça qualquer ajuste necessário para que o seu gráfico faz sentido e incorpora valores de idade possíveis. Formate o seu gráfico.
+
+
+9) b) Apresente o mesmo gráfico de histograma da idade dos candidatos, mas agora separado por gênero.
+
+
+9) c) Como uma forma alternativa de apresentar os dados, divide o seu gráfico de histograma em facets diferentes, dividido por gênero e raça.
+
+10) a) Calcule o porcentagem de votos dos candidatos no seu município.
+
+
+10) b) Calcule a média do porcentagem de votos dos candidatos por idade.
+
+
+10) c) Mostre num gráfico de linhas o porcentagem média de votos dos candidatos (no eixo y) por idade do candidato (no eixo x). Formate o seu gráfico.
+
+10) d) Mostre num gráfico da linhas o porcentagem de votos dos candidatos (no eixo y) por idade do candidato (no eixo x), com linhas separadas por gênero.
+
+10) e) Em qual idade os homens e as mulheres tem a maior chance para ganhar a eleição?
+
+
+11) a) Calcule o voto total de cada partido (não candidato) em cada município nas eleições para vereador em 2016. Depois, calcular o porcentagem do voto de cada partido em cada município.
+
+11) b) Use o código abaixo para gerar uma tabela de IDH (Indíce de Desenvolvimento Humano em 2010) por município.
+
+```{r}
+IDH <- tibble(NM_MUNICIPIO=c("ALTO ALEGRE", "AMAJARI", "BOAVISTA", "BONFIM",
+                      "CANTÁ", "CARACARAÍ", "CAROEBE", "IRACEMA", "MUCAJAÍ", 
+                      "NORMANDIA", "PACARAIMA", "RORAINOPOLIS", 
+                      "SÃO JOÃO DA BALIZA", "SÃO LUIZ", "UIRAMUTÃ"),
+       IDH=c(0.542, 0.484, 0.752, 0.626, 0.619, 0.624, 0.639, 0.582, 0.665, 
+             0.594, 0.650, 0.619, 0.655, 0.649, 0.453))
+```
+
+11) c) Juntar os dados de voto por partido de questão (a) com a tabela de HDI de questão (b). Verifique que o join deu certo para todas as observações, identifique o motivo pelos erros, e corrija os erros.
+
+
+11) d) Crie um gráfico de pontos do IDH do município no eixo X por porcentagem de votos do partido PMDB no eixo Y. Adicione um título e rótulos nos eixos.
+
+
+11) e) Ajuste o seu gráfico na questão (d) para que o tamanho do ponto mostra o total de votos que o PMDB recebeu no munícipio.
+
+11) f) Ajuste o seu gráfico na questão (d) para que o cor dos pontos (em vez do tamanho) mostra o total de votos que o PMDB recebeu no munícipio. Aplique uma escala de cores apropriado da sua escolha.

@@ -68,7 +68,19 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
   - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras - R 4 Data Science:
     - [ ]  Capítulo 13
-
+    
+- [Aula 7](https://jonnyphillips.github.io/Ciencia_de_Dados/Juntando_Bancos.html):
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7.Rmd)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
+  - Leituras:
+    - [ ]  [Exemplo de Análise Espacial no Site R-Spatial](https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html)
+    
+    
+- [Aula 8](https://jonnyphillips.github.io/Ciencia_de_Dados/Mapas.html):
+  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8.Rmd)
+  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8_exercicios.html)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
 
 ## Desafios
 
@@ -76,3 +88,6 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 
 
 - [x] [Desafio 2](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_2.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.Rmd)
+
+
+- [ ] [Desafio 3](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_3.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.Rmd)
