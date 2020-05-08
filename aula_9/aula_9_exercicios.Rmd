@@ -1,0 +1,72 @@
+---
+title: "Exercícios Aula 9 -  Testes Estatísticos e Regressões"
+author: "Beatriz Milz"
+date: "08/05/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center")
+```
+
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+library(broom)
+options(scipen=999)
+```
+
+
+## Exercício 1: Testes Estatísticos
+
+1) Use a função rnorm(1000, 0, 1) para gerar um vetor de 1000 observações aleatoriamente da distribuição normal. Avalie se os valores gerados sejam realmente distribuido normal com um teste Shapiro-Wilk.
+
+__Teste de normalidade__
+
+```{r}
+vetor_normal <- rnorm(1000, 0, 1)
+
+# vetor_normal %>% hist()
+
+shapiro.test(vetor_normal) %>% broom::tidy()
+```
+
+
+2) No banco de dados planes, teste se o ano de fabricação dos voos de fabricador Boeing seja diferente de 2000.
+
+__Teste de média__
+
+```{r}
+teste_media_2 <- planes %>% filter(manufacturer == "BOEING") %>% pull(year) %>% t.test(mu = 2000) %>%  tidy()
+```
+
+
+```{r}
+teste_media_2 %>% mutate(var = "Ano de fabricação") %>% 
+  ggplot() + 
+  geom_point(aes(x = var, y = estimate)) +
+  geom_hline(yintercept = 2000, lty=2, color = "blue") +
+  geom_errorbar(aes(x = var, ymin = conf.low, ymax = conf.high), width = 0.1)
+```
+
+__R:__ Não é diferente.
+
+3) Avalie com um teste apropriado se a velocidade média de voos de Newark (EWR) seja igual a velocidade de vôos de LaGuardia (LGA). (Lembre-se que tem que calcular velocidade).
+
+__Comparar médias__
+
+```{r}
+flights %>% mutate(velocidade = distance/air_time) %>% filter(origin %in% c("LGA", "EWR")) %>% 
+  t.test(velocidade ~ origin, data = .) %>% tidy()
+```
+
+
+4) Usando o banco de dados weather, qual é a correlação entre temperatura e pressão?
+
+5) Crie um gráfico usando geom_errorbar() para comunicar o intervalo de confiança da estimativa de correlação em questão 4. Adicione uma linha horizontal para comparar com uma correlação de zero.

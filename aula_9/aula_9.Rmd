@@ -1,0 +1,96 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "08/05/2020"
+output:
+  html_document: null
+ # word_document: default
+code_folding: hide
+title: "Aula 9 - Testes Estatísticos e Regressões"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+## Introdução
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+library(broom)
+options(scipen=999)
+```
+
+```{r}
+flights %>% sample_n(3000) %>% 
+  pull(dep_delay) %>% 
+  shapiro.test()
+```
+
+```{r}
+flights %>% 
+  ggplot() +
+  geom_density(aes(x=dep_delay)) +
+  xlim(0,100)
+```
+
+```{r}
+teste_normalidade <- flights %>% sample_n(3000) %>% 
+  pull(dep_delay) %>% 
+  shapiro.test() %>% 
+  tidy()
+```
+
+
+## Testes de Médias
+
+
+```{r}
+teste_media <- flights %>% filter(origin!="LGA") %>% 
+  pull(dep_delay) %>%
+  t.test(mu=13.4) %>% 
+  tidy()
+```
+
+```{r}
+teste_media %>% mutate(Variavel="Atraso na partida") %>% 
+  ggplot() +
+  geom_point(aes(x=Variavel, y=estimate)) +
+  geom_hline(yintercept=13.4, lty=2, color="blue") +
+  geom_errorbar(aes(x=Variavel, ymin=conf.low, ymax=conf.high), width=0.1)
+```
+
+## Comparando Médias
+
+```{r}
+flights %>% filter(origin!="LGA") %>% 
+  t.test(dep_delay ~ origin, data=.) %>% 
+  tidy()
+```
+
+
+## Testes de Correlação
+
+```{r}
+flights %>%
+  cor.test( ~ dep_delay + dep_time, data = .) %>%
+  tidy()
+```
+```{r}
+flights %>% sample_n(1000) %>% 
+  ggplot() +
+  geom_point(aes(x=dep_time, y=dep_delay)) +
+  geom_smooth(aes(x=dep_time, y=dep_delay), method="lm")
+```
+
+## Testes de Correlação de Variáveis Categóricas (Chi-squared)
+```{r}
+flights %>% select(origin, carrier) %>% 
+  table() %>% 
+  chisq.test() %>%
+  tidy()
+```
+
+
+
