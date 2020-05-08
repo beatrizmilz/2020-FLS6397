@@ -139,10 +139,10 @@ resultados <-
 
 
 
-__2*)__ Por algum motivo, queremos calcular um resumo do total de votos recebidos por cada candidato em todas as eleições de 2016 - todas as zonas, todos os turnos, etc.
+__2)__* Por algum motivo, queremos calcular um resumo do total de votos recebidos por cada candidato em todas as eleições de 2016 - todas as zonas, todos os turnos, etc.
 
 
-__2*) a)__ Agregar o seu banco de resultados para ter uma linha por candidato resumindo o seu número de votos total.
+__2) a)__ * Agregar o seu banco de resultados para ter uma linha por candidato resumindo o seu número de votos total.
 
 ```{r}
 resultados_votos_totais <- resultados %>% 
@@ -150,26 +150,26 @@ resultados_votos_totais <- resultados %>%
   summarise(total_votos = sum(QT_VOTOS_NOMINAIS, na.rm = TRUE))
 ```
 
-__2*) b)__ Execute um join do tipo apropriado para criar uma tabela de todos os candidatos que se inscreveram para a eleição com os seus dados pessoais, incluindo o número de votos total calculado em (a).
+__2) b)__*  Execute um join do tipo apropriado para criar uma tabela de todos os candidatos que se inscreveram para a eleição com os seus dados pessoais, incluindo o número de votos total calculado em (a).
 
 ```{r}
 left_join(candidatos, resultados_votos_totais, by = "SQ_CANDIDATO")
 ```
 
 
-3) Execute um join do tipo apropriado para uma análise comparando as caractéristicas dos candidatos que correram e os seus resultados eleitorais.
+__3)__ Execute um join do tipo apropriado para uma análise comparando as caractéristicas dos candidatos que correram e os seus resultados eleitorais.
 
 ```{r}
 dados_unidos <- left_join(resultados, candidatos, by = c("SQ_CANDIDATO", "NM_CANDIDATO"))
 ```
 
-4) a) Filtre os seus dados juntados em Questão 3 para focar nas eleições para vereador.
+__4) a)__ Filtre os seus dados juntados em Questão 3 para focar nas eleições para vereador.
 
 ```{r}
 eleicoes_vereador <- dados_unidos %>% filter(DS_CARGO == "Vereador")
 ```
 
-4) b) __[Omitida na versão inicial, exemplo de código fornecido]__ Resume os dados dos vereadores para agregar os dados por município (somando os dados das zonas eleitorais em cada município).
+__4) b)__ __[Omitida na versão inicial, exemplo de código fornecido]__ Resume os dados dos vereadores para agregar os dados por município (somando os dados das zonas eleitorais em cada município).
 
 ```{r eval=FALSE, include=TRUE}
 combinado_vereador <- eleicoes_vereador %>% 
@@ -180,9 +180,9 @@ combinado_vereador <- eleicoes_vereador %>%
   ungroup()
 ```
 
-5) Para o nosso primeiro gráfico, vamos apresentar o número de candidatos para vereador por município, usando o banco de dados criado em questão 4.
+__5)__ Para o nosso primeiro gráfico, vamos apresentar o número de candidatos para vereador por município, usando o banco de dados criado em questão 4.
 
-5) a) Escolhe um tipo de gráfico apropriado e crie o gráfico.
+__5) a)__ Escolhe um tipo de gráfico apropriado e crie o gráfico.
 
 ```{r}
 eleicoes_vereador %>%
@@ -198,11 +198,11 @@ eleicoes_vereador %>%
 ```
 
 
-5) b) Adicione um título ao seu gráfico, e rótulos nos eixos.
+__5) b)__ Adicione um título ao seu gráfico, e rótulos nos eixos.
 
 __R:__ Feito no exercício anterior.
 
-5) c) Use o código da camada + theme(axis.text.x = element_text(angle = 90)) para virar o texto do município para deixar mais visível.
+__5) c)__ Use o código da camada + theme(axis.text.x = element_text(angle = 90)) para virar o texto do município para deixar mais visível.
 
 ```{r}
 eleicoes_vereador %>%
@@ -217,7 +217,7 @@ eleicoes_vereador %>%
   theme(axis.text.x = element_text(angle = 90)) 
 ```
 
-6) Agora, a nossa questão de pesquisa é o número de candidatos por gênero (variável DS_GENERO) no estado inteiro, usando o banco de dados de vereadores de questão 4. Prepare um gráfico apropriado, com título, rótulos nos eixos e aplique um tema simples da sua escolha.
+__6)__ Agora, a nossa questão de pesquisa é o número de candidatos por gênero (variável DS_GENERO) no estado inteiro, usando o banco de dados de vereadores de questão 4. Prepare um gráfico apropriado, com título, rótulos nos eixos e aplique um tema simples da sua escolha.
 
 ```{r}
 eleicoes_vereador %>% 
@@ -229,7 +229,7 @@ eleicoes_vereador %>%
 ```
 
 
-6) a) Gere um gráfico apropriado que mostra o porcentagem de candidatos por gênero em cada município, usando o banco de dados de vereadores de questão 4.
+__6) a)__ Gere um gráfico apropriado que mostra o porcentagem de candidatos por gênero em cada município, usando o banco de dados de vereadores de questão 4.
 
 ```{r}
 eleicoes_vereador %>% 
@@ -246,13 +246,13 @@ eleicoes_vereador %>%
    theme(legend.position="bottom")
 ```
 
-6) b) Formate o seu gráfico com títulos, rótulos nos eixos, virando o texto no eixo x, e ajuste a legenda para que ela fique abaixo do gráfico.
+__6) b)__ Formate o seu gráfico com títulos, rótulos nos eixos, virando o texto no eixo x, e ajuste a legenda para que ela fique abaixo do gráfico.
 
 
 __R:__ Feito no exercício anterior.
 
 
-7) a) Gere uma variável binário para os vereadores eleitos (da variável DS_SIT_TOT_TURNO), e calcule a taxa de sucesso (% eleito) de candidatos por município e gênero.
+__7) a)__ Gere uma variável binário para os vereadores eleitos (da variável DS_SIT_TOT_TURNO), e calcule a taxa de sucesso (% eleito) de candidatos por município e gênero.
 
 ```{r}
 eleicoes_vereador <- eleicoes_vereador %>% mutate(binario_eleito = case_when(
@@ -274,7 +274,7 @@ genero_porcentagem <- eleicoes_vereador %>% group_by(NM_MUNICIPIO, DS_GENERO) %>
 ```
 
 
-7) b) Mostre um gráfico de barras da taxa de sucesso (% eleito) dos candidatos femininos por município, com formatação apropriada.
+__7) b) __ Mostre um gráfico de barras da taxa de sucesso (% eleito) dos candidatos femininos por município, com formatação apropriada.
 
 ```{r}
 genero_porcentagem  %>% 
@@ -290,43 +290,112 @@ genero_porcentagem  %>%
    theme(legend.position="bottom")
 ```
 
-7) c) Extende o seu gráfico para mostrar a taxa de sucesso de homens e mulheres lado a lado, por município.
+__7) c)__ Extende o seu gráfico para mostrar a taxa de sucesso de homens e mulheres lado a lado, por município.
 
 __R:__ Feito no exercício anterior.
 
 
-7) d) Qual é o município em que as mulheres têm uma maior taxa de sucesso que os homens?
+__7)__ d) Qual é o município em que as mulheres têm uma maior taxa de sucesso que os homens?
 
 __R:__ Caroebe
 
 
+__8)__ Gere um gráfico de ‘tile’, que mostra o número de candidatos por município e gênero. Aplique uma escala de cores apropriado da sua escolha. Formate o seu gráfico.
 
-8) Gere um gráfico de ‘tile’, que mostra o número de candidatos por município e gênero. Aplique uma escala de cores apropriado da sua escolha. Formate o seu gráfico.
-
-9) a) Apresente um gráfico de histograma da idade dos candidatos (NR_IDADE_DATA_POSSE). Faça qualquer ajuste necessário para que o seu gráfico faz sentido e incorpora valores de idade possíveis. Formate o seu gráfico.
-
-
-9) b) Apresente o mesmo gráfico de histograma da idade dos candidatos, mas agora separado por gênero.
-
-
-9) c) Como uma forma alternativa de apresentar os dados, divide o seu gráfico de histograma em facets diferentes, dividido por gênero e raça.
-
-10) a) Calcule o porcentagem de votos dos candidatos no seu município.
-
-
-10) b) Calcule a média do porcentagem de votos dos candidatos por idade.
-
-
-10) c) Mostre num gráfico de linhas o porcentagem média de votos dos candidatos (no eixo y) por idade do candidato (no eixo x). Formate o seu gráfico.
-
-10) d) Mostre num gráfico da linhas o porcentagem de votos dos candidatos (no eixo y) por idade do candidato (no eixo x), com linhas separadas por gênero.
-
-10) e) Em qual idade os homens e as mulheres tem a maior chance para ganhar a eleição?
+```{r}
+eleicoes_vereador %>%
+  group_by(NM_MUNICIPIO, DS_GENERO) %>% tally() %>%
+  ggplot() +
+  geom_tile(aes(x = NM_MUNICIPIO, y = DS_GENERO, fill = n)) +
+ 
+  scale_fill_viridis_c()+
+   theme_light() +
+  theme(axis.text.x = element_text(angle = 90)) +
+   labs(x = "Município", 
+       y = "Gênero", 
+        title = "Quantidade de candidatos(as) para o cargo de \n vereador(a) por gênero e município", 
+        subtitle = "Na eleição de 2016 para o estado de RR",
+       fill = "Número de \n candidatos(as)")
+```
 
 
-11) a) Calcule o voto total de cada partido (não candidato) em cada município nas eleições para vereador em 2016. Depois, calcular o porcentagem do voto de cada partido em cada município.
 
-11) b) Use o código abaixo para gerar uma tabela de IDH (Indíce de Desenvolvimento Humano em 2010) por município.
+__9) a)__ Apresente um gráfico de histograma da idade dos candidatos (NR_IDADE_DATA_POSSE). Faça qualquer ajuste necessário para que o seu gráfico faz sentido e incorpora valores de idade possíveis. Formate o seu gráfico.
+
+
+```{r}
+
+# Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
+eleicoes_vereador %>% 
+  filter(NR_IDADE_DATA_POSSE < 100) %>% 
+ggplot()+
+  geom_histogram(aes(x = NR_IDADE_DATA_POSSE))   +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90)) +
+   labs(x = "Idade (anos)", 
+       y = "Quantidade de candidatos(as)", 
+        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)", 
+        subtitle = "Na eleição de 2016 para o estado de RR")
+```
+
+
+__9) b)__ Apresente o mesmo gráfico de histograma da idade dos candidatos, mas agora separado por gênero.
+
+
+```{r}
+
+# Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
+eleicoes_vereador %>% 
+  filter(NR_IDADE_DATA_POSSE < 100) %>% 
+ggplot()+
+  geom_histogram(aes(x = NR_IDADE_DATA_POSSE, fill = DS_GENERO))   +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90)) +
+   labs(x = "Idade (anos)", 
+       y = "Quantidade de candidatos(as)", 
+        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)", 
+        subtitle = "Na eleição de 2016 para o estado de RR",
+       fill = "Gênero")
+```
+
+__9) c) __ Como uma forma alternativa de apresentar os dados, divide o seu gráfico de histograma em facets diferentes, dividido por gênero e raça.
+
+
+```{r}
+
+# Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
+eleicoes_vereador %>% 
+  filter(NR_IDADE_DATA_POSSE < 100) %>% 
+ggplot()+
+  geom_histogram(aes(x = NR_IDADE_DATA_POSSE, fill = DS_GENERO))   +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90)) +
+   labs(x = "Idade (anos)", 
+       y = "Quantidade de candidatos(as)", 
+        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a), segundo o gênero e raça", 
+        subtitle = "Na eleição de 2016 para o estado de RR",
+       fill = "Gênero")+
+  facet_grid(DS_GENERO ~ DS_COR_RACA)+
+   theme(legend.position="bottom")
+```
+
+
+__10) a)__ Calcule o porcentagem de votos dos candidatos no seu município.
+
+
+__10) b)__ Calcule a média do porcentagem de votos dos candidatos por idade.
+
+
+__10) c)__ Mostre num gráfico de linhas o porcentagem média de votos dos candidatos (no eixo y) por idade do candidato (no eixo x). Formate o seu gráfico.
+
+__10) d)__ Mostre num gráfico da linhas o porcentagem de votos dos candidatos (no eixo y) por idade do candidato (no eixo x), com linhas separadas por gênero.
+
+__10) e)__ Em qual idade os homens e as mulheres tem a maior chance para ganhar a eleição?
+
+
+__11) a)__ Calcule o voto total de cada partido (não candidato) em cada município nas eleições para vereador em 2016. Depois, calcular o porcentagem do voto de cada partido em cada município.
+
+__11) b)__ Use o código abaixo para gerar uma tabela de IDH (Indíce de Desenvolvimento Humano em 2010) por município.
 
 ```{r}
 IDH <- tibble(NM_MUNICIPIO=c("ALTO ALEGRE", "AMAJARI", "BOAVISTA", "BONFIM",
@@ -337,12 +406,12 @@ IDH <- tibble(NM_MUNICIPIO=c("ALTO ALEGRE", "AMAJARI", "BOAVISTA", "BONFIM",
              0.594, 0.650, 0.619, 0.655, 0.649, 0.453))
 ```
 
-11) c) Juntar os dados de voto por partido de questão (a) com a tabela de HDI de questão (b). Verifique que o join deu certo para todas as observações, identifique o motivo pelos erros, e corrija os erros.
+__11) c)__ Juntar os dados de voto por partido de questão (a) com a tabela de HDI de questão (b). Verifique que o join deu certo para todas as observações, identifique o motivo pelos erros, e corrija os erros.
 
 
-11) d) Crie um gráfico de pontos do IDH do município no eixo X por porcentagem de votos do partido PMDB no eixo Y. Adicione um título e rótulos nos eixos.
+__11) d)__ Crie um gráfico de pontos do IDH do município no eixo X por porcentagem de votos do partido PMDB no eixo Y. Adicione um título e rótulos nos eixos.
 
 
-11) e) Ajuste o seu gráfico na questão (d) para que o tamanho do ponto mostra o total de votos que o PMDB recebeu no munícipio.
+__11) e)__ Ajuste o seu gráfico na questão (d) para que o tamanho do ponto mostra o total de votos que o PMDB recebeu no munícipio.
 
-11) f) Ajuste o seu gráfico na questão (d) para que o cor dos pontos (em vez do tamanho) mostra o total de votos que o PMDB recebeu no munícipio. Aplique uma escala de cores apropriado da sua escolha.
+__11) f)__ Ajuste o seu gráfico na questão (d) para que o cor dos pontos (em vez do tamanho) mostra o total de votos que o PMDB recebeu no munícipio. Aplique uma escala de cores apropriado da sua escolha.
