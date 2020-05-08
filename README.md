@@ -90,4 +90,4 @@ Resolução de exercícios da disciplina FLS 6397. Anotações das leituras [nes
 - [x] [Desafio 2](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_2.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_2/desafio_2.Rmd)
 
 
-- [ ] [Desafio 3](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_3.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.Rmd)
+- [x] [Desafio 3](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_3.html)- Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.Rmd)

@@ -3,7 +3,7 @@ title: 'Desafio 3: Combinação e Visualização de Dados'
 author: "Beatriz Milz"
 output:
   html_document:
-    code_folding: hide
+    code_folding: show
     df_print: paged
   word_document: default
 subtitle: "Entregar até 14h00 de 08/05/2020"
@@ -11,14 +11,14 @@ subtitle: "Entregar até 14h00 de 08/05/2020"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE,
-                      warning = FALSE)
+                      warning = FALSE,
+                      fig.align = "center")
 ```
 
 HTML compilado em: `r format(Sys.Date(), format="%d de %B de %Y")`
 
 ```{r}
 ## Carregar pacotes
-
 library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
 library(dplyr)
 library(readr)
@@ -45,19 +45,29 @@ __1) c)__ Dos arquivos descompactados, abre os dois bancos para Roraima (RR) em 
 
 ```{r}
 
-consulta_cand_2016_RR <- read_delim("dados/consulta_cand_2016_RR.csv", 
-    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"),  
+consulta_cand_2016_RR <-
+  read_delim(
+    "dados/consulta_cand_2016_RR.csv",
+    ";",
+    escape_double = FALSE,
+    locale = locale(encoding = "ISO-8859-1"),
     col_types = cols(SQ_CANDIDATO = col_character(), SQ_COLIGACAO = col_character()),
-    trim_ws = TRUE)
+    trim_ws = TRUE
+  )
 
 # View(consulta_cand_2016_RR)
 ```
 
 ```{r}
-votacao_candidato_munzona_2016_RR <- read_delim("dados/votacao_candidato_munzona_2016_RR.csv", 
-    ";", escape_double = FALSE, col_types = cols(SQ_CANDIDATO = col_character(), SQ_COLIGACAO = col_character()), 
-    locale = locale(encoding = "ISO-8859-1"), 
-    trim_ws = TRUE)
+votacao_candidato_munzona_2016_RR <-
+  read_delim(
+    "dados/votacao_candidato_munzona_2016_RR.csv",
+    ";",
+    escape_double = FALSE,
+    col_types = cols(SQ_CANDIDATO = col_character(), SQ_COLIGACAO = col_character()),
+    locale = locale(encoding = "ISO-8859-1"),
+    trim_ws = TRUE
+  )
 
 # View(votacao_candidato_munzona_2016_RR)
 ```
@@ -69,7 +79,7 @@ __2) a)__ Identifique a unidade de análise do banco de candidatos - o que repes
 __R:__  Cada linha da base "consulta_cand_idato_2016_RR" representa um/uma candidato/a na eleição do ano de 2016, estado de Roraima. A variável que identifica cada linha exclusivamente é SQ_CANDIDATO.
 
 ```{r}
-consulta_cand_2016_RR$SQ_CANDIDATO %>% unique() %>% length()
+# consulta_cand_2016_RR$SQ_CANDIDATO %>% unique() %>% length()
 ```
 
 
@@ -78,12 +88,12 @@ __2) b)__ Identifique a unidade de análise do banco de resultados - o que repes
 __R:__  Cada linha da base "votacao_candidato_munzona_2016_RR" representa os cadidatos por zona na eleição do ano de 2016, estado de Roraima. As variáveis que identificam cada linha exclusivamente são SQ_CANDIDATO e NR_ZONA.
 
 ```{r}
-votacao_candidato_munzona_2016_RR %>% select(SQ_CANDIDATO, NR_ZONA) %>% unique() %>% nrow()
+# votacao_candidato_munzona_2016_RR %>% select(SQ_CANDIDATO, NR_ZONA) %>% unique() %>% nrow()
 ```
 
 __2) c)__ Liste as variáveis que compõem os identificadores comuns para realizar a junção dos dois bancos.
 
-__R:__  SQ_CANDIDATO
+__R:__  `SQ_CANDIDATO`
 
 
 __2) d)__ Use anti_join para identificador se há resultados que faltam detalhes do seu candidato no banco de dados de candidatos.
@@ -91,19 +101,21 @@ __2) d)__ Use anti_join para identificador se há resultados que faltam detalhes
 ```{r}
 # anti_join(votacao_candidato_munzona_2016_RR,
 #           consulta_cand_2016_RR,
-#           by = "SQ_CANDIDATO")
+#           by = c("SQ_CANDIDATO"))
+
+# Aqui está dando erro.. (?)
 ```
 
 
 __2) e)__ Use anti_join para identificador se há candidatos faltando no banco de dados de resultados. (Bonus: Investigando as colunas do resultado de anti_join, você pode identificar porque eles não existem no banco de resultados?).
 
 ```{r}
-anti_join(consulta_cand_2016_RR, votacao_candidato_munzona_2016_RR, by = "SQ_CANDIDATO") 
+ex_2e <- anti_join(consulta_cand_2016_RR, votacao_candidato_munzona_2016_RR, by = "SQ_CANDIDATO") 
 
-# anti_join(consulta_cand_2016_RR, votacao_candidato_munzona_2016_RR, by = "SQ_CANDIDATO") %>% 
-#   filter(DS_SITUACAO_CANDIDATURA == "INAPTO" | DS_DETALHE_SITUACAO_CAND %in% c("RENÚNCIA|INDEFERIDO"))
+
 ```
 
+__R:__ Existem `r nrow(ex_2e)` candidatos faltando no banco de dados de resultados.
 
 __2) f)__ Não precisamos trabalhar com todas as colunas para a análise então para limpar os dados e deixar mais fácil entende-los, selecionar apenas as próximas colunas:
 
@@ -145,15 +157,17 @@ __2)__* Por algum motivo, queremos calcular um resumo do total de votos recebido
 __2) a)__ * Agregar o seu banco de resultados para ter uma linha por candidato resumindo o seu número de votos total.
 
 ```{r}
-resultados_votos_totais <- resultados %>% 
-  group_by(SQ_CANDIDATO) %>% 
+resultados_votos_totais <- resultados %>%
+  group_by(SQ_CANDIDATO) %>%
   summarise(total_votos = sum(QT_VOTOS_NOMINAIS, na.rm = TRUE))
 ```
 
 __2) b)__*  Execute um join do tipo apropriado para criar uma tabela de todos os candidatos que se inscreveram para a eleição com os seus dados pessoais, incluindo o número de votos total calculado em (a).
 
 ```{r}
-left_join(candidatos, resultados_votos_totais, by = "SQ_CANDIDATO")
+ex_2b <- left_join(candidatos, resultados_votos_totais, by = "SQ_CANDIDATO") 
+
+head(ex_2b)
 ```
 
 
@@ -172,11 +186,21 @@ eleicoes_vereador <- dados_unidos %>% filter(DS_CARGO == "Vereador")
 __4) b)__ __[Omitida na versão inicial, exemplo de código fornecido]__ Resume os dados dos vereadores para agregar os dados por município (somando os dados das zonas eleitorais em cada município).
 
 ```{r eval=FALSE, include=TRUE}
-combinado_vereador <- eleicoes_vereador %>% 
-  group_by(SQ_CANDIDATO, NM_MUNICIPIO, DS_CARGO, NR_TURNO, DS_SIT_TOT_TURNO, 
-           NM_CANDIDATO, SG_PARTIDO, NR_IDADE_DATA_POSSE, DS_GENERO, 
-           DS_GRAU_INSTRUCAO, DS_COR_RACA) %>%
-  summarize(QT_VOTOS_NOMINAIS=sum(QT_VOTOS_NOMINAIS, na.rm=T)) %>%
+combinado_vereador <- eleicoes_vereador %>%
+  group_by(
+    SQ_CANDIDATO,
+    NM_MUNICIPIO,
+    DS_CARGO,
+    NR_TURNO,
+    DS_SIT_TOT_TURNO,
+    NM_CANDIDATO,
+    SG_PARTIDO,
+    NR_IDADE_DATA_POSSE,
+    DS_GENERO,
+    DS_GRAU_INSTRUCAO,
+    DS_COR_RACA
+  ) %>%
+  summarize(QT_VOTOS_NOMINAIS = sum(QT_VOTOS_NOMINAIS, na.rm = T)) %>%
   ungroup()
 ```
 
@@ -186,15 +210,18 @@ __5) a)__ Escolhe um tipo de gráfico apropriado e crie o gráfico.
 
 ```{r}
 eleicoes_vereador %>%
-  group_by(NM_MUNICIPIO) %>% 
+  group_by(NM_MUNICIPIO) %>%
   tally() %>%
   ggplot() +
-  geom_col(aes(x = reorder(NM_MUNICIPIO , n), y = n)) +
-  coord_flip() + 
+  geom_col(aes(x = reorder(NM_MUNICIPIO , n), y = n), fill = "lightblue") +
+  coord_flip() +
   theme_bw() +
-  labs(title = "Número de candidatos(as) para o cargo de vereador(a) \n por município", subtitle = "Na eleição de 2016 para o estado de RR",
-       x = "Município", y = "Número de candidatos(as)"
-          )
+  labs(
+    title = "Número de candidatos(as) para o cargo de vereador(a) \n por município",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    x = "Município",
+    y = "Número de candidatos(as)"
+  )
 ```
 
 
@@ -206,44 +233,61 @@ __5) c)__ Use o código da camada + theme(axis.text.x = element_text(angle = 90)
 
 ```{r}
 eleicoes_vereador %>%
-  group_by(NM_MUNICIPIO) %>% 
+  group_by(NM_MUNICIPIO) %>%
   tally() %>%
   ggplot() +
-  geom_col(aes(x = reorder(NM_MUNICIPIO , n), y = n)) +
+  geom_col(aes(x = reorder(NM_MUNICIPIO , n), y = n), fill = "lightblue") +
   theme_bw() +
-  labs(title = "Número de candidatos(as) para o cargo de vereador(a) \n por município", subtitle = "Na eleição de 2016 para o estado de RR",
-       x = "Município", y = "Número de candidatos(as)"
-          ) +
+  labs(
+    title = "Número de candidatos(as) para o cargo de vereador(a) \n por município",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    x = "Município",
+    y = "Número de candidatos(as)"
+  ) +
   theme(axis.text.x = element_text(angle = 90)) 
 ```
 
 __6)__ Agora, a nossa questão de pesquisa é o número de candidatos por gênero (variável DS_GENERO) no estado inteiro, usando o banco de dados de vereadores de questão 4. Prepare um gráfico apropriado, com título, rótulos nos eixos e aplique um tema simples da sua escolha.
 
 ```{r}
-eleicoes_vereador %>% 
-  group_by(DS_GENERO) %>% tally() %>% 
+eleicoes_vereador %>%
+  group_by(DS_GENERO) %>% tally() %>%
   ggplot() +
-  geom_col(aes(x = DS_GENERO, y = n)) +
+  geom_col(aes(x = DS_GENERO, y = n, fill = DS_GENERO)) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
   theme_light() +
-  labs(x = "Gênero", y = "Número de candidatos(as)", title = "Número de candidatos(as) para o cargo de vereador(a) \n por gênero", subtitle = "Na eleição de 2016 para o estado de RR")
+  labs(
+    x = "Gênero",
+    y = "Número de candidatos(as)",
+    title = "Número de candidatos(as) para o cargo de vereador(a) \n por gênero",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Gênero"
+  )
 ```
 
 
 __6) a)__ Gere um gráfico apropriado que mostra o porcentagem de candidatos por gênero em cada município, usando o banco de dados de vereadores de questão 4.
 
 ```{r}
-eleicoes_vereador %>% 
-  group_by(NM_MUNICIPIO, DS_GENERO) %>% tally() %>% 
+eleicoes_vereador %>%
+  group_by(NM_MUNICIPIO, DS_GENERO) %>% tally() %>%
   ggplot() +
-  geom_col(aes(x = reorder(NM_MUNICIPIO , n), y = n, fill = DS_GENERO), position = "fill") +
-  coord_flip() + 
+  geom_col(aes(
+    x = reorder(NM_MUNICIPIO , n),
+    y = n,
+    fill = DS_GENERO
+  ), position = "fill") +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  coord_flip() +
   theme_light() +
-  labs(x = "Município", 
-       y = "Porcentagem (%)", 
-       title = "Porcentagem de de candidatos(as) para o cargo de \n vereador(a) gênero", 
-       subtitle = "Na eleição de 2016 para o estado de RR",
-       fill = "Gênero") +
-   theme(legend.position="bottom")
+  labs(
+    x = "Município",
+    y = "Porcentagem (%)",
+    title = "Porcentagem de de candidatos(as) para o cargo de \n vereador(a) gênero",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Gênero"
+  ) +
+  theme(legend.position = "bottom")
 ```
 
 __6) b)__ Formate o seu gráfico com títulos, rótulos nos eixos, virando o texto no eixo x, e ajuste a legenda para que ela fique abaixo do gráfico.
@@ -255,39 +299,53 @@ __R:__ Feito no exercício anterior.
 __7) a)__ Gere uma variável binário para os vereadores eleitos (da variável DS_SIT_TOT_TURNO), e calcule a taxa de sucesso (% eleito) de candidatos por município e gênero.
 
 ```{r}
-eleicoes_vereador <- eleicoes_vereador %>% mutate(binario_eleito = case_when(
-  
-  DS_SIT_TOT_TURNO == "ELEITO POR QP" ~ TRUE,
-  DS_SIT_TOT_TURNO == "ELEITO POR MÉDIA" ~ TRUE,
-  DS_SIT_TOT_TURNO == "NÃO ELEITO" ~ FALSE,
-  DS_SIT_TOT_TURNO == "SUPLENTE" ~ FALSE
-  
-))
+eleicoes_vereador <-
+  eleicoes_vereador %>% mutate(
+    binario_eleito = case_when(
+      DS_SIT_TOT_TURNO == "ELEITO POR QP" ~ TRUE,
+      DS_SIT_TOT_TURNO == "ELEITO POR MÉDIA" ~ TRUE,
+      DS_SIT_TOT_TURNO == "NÃO ELEITO" ~ FALSE,
+      DS_SIT_TOT_TURNO == "SUPLENTE" ~ FALSE
+      
+    )
+  )
 
-genero_porcentagem <- eleicoes_vereador %>% group_by(NM_MUNICIPIO, DS_GENERO) %>%
+genero_porcentagem <-
+  eleicoes_vereador %>% group_by(NM_MUNICIPIO, DS_GENERO) %>%
   summarise(
     total_eleito = sum(binario_eleito == TRUE),
     total_nao_eleito = sum(binario_eleito == FALSE)
-  ) %>% 
-  mutate(total = total_eleito + total_nao_eleito,
-         porcentagem_eleito = (total_eleito/total)*100)
+  ) %>%
+  mutate(
+    total = total_eleito + total_nao_eleito,
+    porcentagem_eleito = (total_eleito / total) * 100
+  )
+
 ```
 
 
 __7) b) __ Mostre um gráfico de barras da taxa de sucesso (% eleito) dos candidatos femininos por município, com formatação apropriada.
 
 ```{r}
-genero_porcentagem  %>% 
+genero_porcentagem  %>%
   ggplot() +
-  geom_col(aes(x = reorder(NM_MUNICIPIO , porcentagem_eleito), y = porcentagem_eleito, fill = DS_GENERO), position = "dodge") +
-  coord_flip() + 
+  geom_col(aes(
+    x = reorder(NM_MUNICIPIO , porcentagem_eleito),
+    y = porcentagem_eleito,
+    fill = DS_GENERO
+  ),
+  position = "dodge") +
+  coord_flip() +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
   theme_light() +
-  labs(x = "Município", 
-       y = "Porcentagem de eleição (%)", 
-        title = "Porcentagem de candidatos(as) eleitos para o cargo de \n vereador(a) por gênero", 
-        subtitle = "Na eleição de 2016 para o estado de RR",
-       fill = "Gênero") +
-   theme(legend.position="bottom")
+  labs(
+    x = "Município",
+    y = "Porcentagem de eleição (%)",
+    title = "Porcentagem de candidatos(as) eleitos para o cargo de \n vereador(a) por gênero",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Gênero"
+  ) +
+  theme(legend.position = "bottom")
 ```
 
 __7) c)__ Extende o seu gráfico para mostrar a taxa de sucesso de homens e mulheres lado a lado, por município.
@@ -307,15 +365,16 @@ eleicoes_vereador %>%
   group_by(NM_MUNICIPIO, DS_GENERO) %>% tally() %>%
   ggplot() +
   geom_tile(aes(x = NM_MUNICIPIO, y = DS_GENERO, fill = n)) +
- 
-  scale_fill_viridis_c()+
-   theme_light() +
+  scale_fill_viridis_c() +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 90)) +
-   labs(x = "Município", 
-       y = "Gênero", 
-        title = "Quantidade de candidatos(as) para o cargo de \n vereador(a) por gênero e município", 
-        subtitle = "Na eleição de 2016 para o estado de RR",
-       fill = "Número de \n candidatos(as)")
+  labs(
+    x = "Município",
+    y = "Gênero",
+    title = "Quantidade de candidatos(as) para o cargo de \n vereador(a) por gênero e município",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Número de \n candidatos(as)"
+  )
 ```
 
 
@@ -326,16 +385,18 @@ __9) a)__ Apresente um gráfico de histograma da idade dos candidatos (NR_IDADE_
 ```{r}
 
 # Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
-eleicoes_vereador %>% 
-  filter(NR_IDADE_DATA_POSSE < 100) %>% 
-ggplot()+
-  geom_histogram(aes(x = NR_IDADE_DATA_POSSE))   +
+eleicoes_vereador %>%
+  filter(NR_IDADE_DATA_POSSE < 100) %>%
+  ggplot() +
+  geom_histogram(aes(x = NR_IDADE_DATA_POSSE), fill = "lightblue")   +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90)) +
-   labs(x = "Idade (anos)", 
-       y = "Quantidade de candidatos(as)", 
-        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)", 
-        subtitle = "Na eleição de 2016 para o estado de RR")
+  labs(
+    x = "Idade (anos)",
+    y = "Quantidade de candidatos(as)",
+    title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)",
+    subtitle = "Na eleição de 2016 para o estado de RR"
+  )
 ```
 
 
@@ -345,17 +406,20 @@ __9) b)__ Apresente o mesmo gráfico de histograma da idade dos candidatos, mas 
 ```{r}
 
 # Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
-eleicoes_vereador %>% 
-  filter(NR_IDADE_DATA_POSSE < 100) %>% 
-ggplot()+
+eleicoes_vereador %>%
+  filter(NR_IDADE_DATA_POSSE < 100) %>%
+  ggplot() +
   geom_histogram(aes(x = NR_IDADE_DATA_POSSE, fill = DS_GENERO))   +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90)) +
-   labs(x = "Idade (anos)", 
-       y = "Quantidade de candidatos(as)", 
-        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)", 
-        subtitle = "Na eleição de 2016 para o estado de RR",
-       fill = "Gênero")
+  labs(
+    x = "Idade (anos)",
+    y = "Quantidade de candidatos(as)",
+    title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a)",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Gênero"
+  )
 ```
 
 __9) c) __ Como uma forma alternativa de apresentar os dados, divide o seu gráfico de histograma em facets diferentes, dividido por gênero e raça.
@@ -364,54 +428,267 @@ __9) c) __ Como uma forma alternativa de apresentar os dados, divide o seu gráf
 ```{r}
 
 # Essa base tem valores discrepantes criado por um erro! Filtrei para idade menor que 100 anos.
-eleicoes_vereador %>% 
-  filter(NR_IDADE_DATA_POSSE < 100) %>% 
-ggplot()+
+eleicoes_vereador %>%
+  filter(NR_IDADE_DATA_POSSE < 100) %>%
+  ggplot() +
   geom_histogram(aes(x = NR_IDADE_DATA_POSSE, fill = DS_GENERO))   +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90)) +
-   labs(x = "Idade (anos)", 
-       y = "Quantidade de candidatos(as)", 
-        title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a), segundo o gênero e raça", 
-        subtitle = "Na eleição de 2016 para o estado de RR",
-       fill = "Gênero")+
-  facet_grid(DS_GENERO ~ DS_COR_RACA)+
-   theme(legend.position="bottom")
+  labs(
+    x = "Idade (anos)",
+    y = "Quantidade de candidatos(as)",
+    title = "Histograma de idade na data da posse, dos(as) candidatos(as) \n para o cargo de vereador(a), segundo o gênero e raça",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    fill = "Gênero"
+  ) +
+  facet_grid(DS_GENERO ~ DS_COR_RACA) +
+  theme(legend.position = "bottom")
 ```
 
 
 __10) a)__ Calcule o porcentagem de votos dos candidatos no seu município.
 
+```{r}
+eleicoes_vereador_porcentagem <-
+  eleicoes_vereador %>% 
+  group_by(SQ_CANDIDATO, NM_CANDIDATO, NM_MUNICIPIO) %>%
+  summarise(total_votos_candidato = sum(QT_VOTOS_NOMINAIS, na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(NM_MUNICIPIO) %>%
+  mutate(
+    total_votos_municipio = sum(total_votos_candidato, na.rm = TRUE),
+    porcentagem_votos_munic = round((
+      total_votos_candidato /
+        total_votos_municipio
+    ) * 100, 2)
+  ) %>%
+  select(-total_votos_candidato, -total_votos_municipio)
+
+head(eleicoes_vereador_porcentagem)
+
+
+
+# Checando se totaliza 100% para cada municipio
+# eleicoes_vereador_porcentagem %>% group_by(NM_MUNICIPIO) %>% summarise(total_porc = sum(porcentagem_votos_munic, na.rm = TRUE))
+```
 
 __10) b)__ Calcule a média do porcentagem de votos dos candidatos por idade.
+
+```{r}
+eleicoes_vereador_porc_idade <-
+  eleicoes_vereador %>% left_join(
+    eleicoes_vereador_porcentagem,
+    by = c("SQ_CANDIDATO", "NM_CANDIDATO", "NM_MUNICIPIO")
+  ) %>%
+  filter(NR_IDADE_DATA_POSSE < 100) %>%
+  group_by(NR_IDADE_DATA_POSSE) %>%
+  summarise(media_porcentagem_idade = round(mean(porcentagem_votos_munic, na.rm = TRUE), 2))
+
+head(eleicoes_vereador_porc_idade)
+```
+
 
 
 __10) c)__ Mostre num gráfico de linhas o porcentagem média de votos dos candidatos (no eixo y) por idade do candidato (no eixo x). Formate o seu gráfico.
 
+```{r}
+eleicoes_vereador_porc_idade %>%
+  ggplot() +
+  geom_line(aes(x =  NR_IDADE_DATA_POSSE, y = media_porcentagem_idade)) +
+  geom_point(aes(x =  NR_IDADE_DATA_POSSE, y = media_porcentagem_idade),
+             alpha = 0.5) +
+  theme_light() +
+  labs(
+    x = "Idade (anos)",
+    y = "Porcentagem média de votos dos candidatos (%)",
+    title = "Porcentagem média de votos, dos(as) candidatos(as) \n para o cargo de vereador(a), segundo a idade",
+    subtitle = "Na eleição de 2016 para o estado de RR"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+
+
 __10) d)__ Mostre num gráfico da linhas o porcentagem de votos dos candidatos (no eixo y) por idade do candidato (no eixo x), com linhas separadas por gênero.
 
+```{r}
+eleicoes_vereador_porc_idade_genero <-
+  eleicoes_vereador %>% left_join(
+    eleicoes_vereador_porcentagem,
+    by = c("SQ_CANDIDATO", "NM_CANDIDATO", "NM_MUNICIPIO")
+  ) %>%
+  filter(NR_IDADE_DATA_POSSE < 100) %>%
+  group_by(NR_IDADE_DATA_POSSE, DS_GENERO) %>%
+  summarise(media_porcentagem_idade = round(mean(porcentagem_votos_munic, na.rm = TRUE), 2))
+
+
+eleicoes_vereador_porc_idade_genero %>%
+  ggplot() +
+  geom_line(aes(x =  NR_IDADE_DATA_POSSE, y = media_porcentagem_idade, colour = DS_GENERO)) +
+  geom_point(aes(x =  NR_IDADE_DATA_POSSE, y = media_porcentagem_idade, colour = DS_GENERO),
+             alpha = 0.5) +
+  scale_color_brewer(palette = "Dark2", direction = -1) +
+  theme_light() +
+  labs(
+    x = "Idade (anos)",
+    y = "Porcentagem média de votos dos candidatos (%)",
+    title = "Porcentagem média de votos, dos(as) candidatos(as) \n para o cargo de vereador(a), segundo a idade e gênero",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    colour = "Gênero"
+  ) +
+  theme(legend.position = "bottom")
+```
+
 __10) e)__ Em qual idade os homens e as mulheres tem a maior chance para ganhar a eleição?
+
+```{r}
+
+
+ex10e <-
+  eleicoes_vereador %>% filter(binario_eleito == TRUE) %>% group_by(DS_GENERO, NR_IDADE_DATA_POSSE) %>% tally() %>% arrange(-n)
+
+
+masc_10e <-
+  ex10e  %>% filter(DS_GENERO == "MASCULINO") %>% .[[1, 2]]
+
+
+fem_10e <-
+  ex10e  %>% filter(DS_GENERO == "FEMININO")  %>% .[[1, 2]]
+```
+
+
+__R:__ Considerando os dados das eleições para o cargo de vereador(a) de RR para o ano de 2016, dentre as pessoas que ganharam a eleição, a idade mais frequente para pessoas do gênero masculino é `r masc_10e` anos, e para as pessoas do gênero feminino é `r fem_10e` anos.
 
 
 __11) a)__ Calcule o voto total de cada partido (não candidato) em cada município nas eleições para vereador em 2016. Depois, calcular o porcentagem do voto de cada partido em cada município.
 
+```{r}
+votos_partido <- eleicoes_vereador %>%
+  group_by(NM_MUNICIPIO, SG_PARTIDO) %>%
+  summarise(total_votos_partido = sum(QT_VOTOS_NOMINAIS, na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(NM_MUNICIPIO) %>%
+  mutate(
+    total_votos_municipio = sum(total_votos_partido, na.rm = TRUE),
+    porcentagem_votos_partido_munic = round(100 * (
+      total_votos_partido / total_votos_municipio
+    ), 2)
+  )
+
+```
+
+
 __11) b)__ Use o código abaixo para gerar uma tabela de IDH (Indíce de Desenvolvimento Humano em 2010) por município.
 
 ```{r}
-IDH <- tibble(NM_MUNICIPIO=c("ALTO ALEGRE", "AMAJARI", "BOAVISTA", "BONFIM",
-                      "CANTÁ", "CARACARAÍ", "CAROEBE", "IRACEMA", "MUCAJAÍ", 
-                      "NORMANDIA", "PACARAIMA", "RORAINOPOLIS", 
-                      "SÃO JOÃO DA BALIZA", "SÃO LUIZ", "UIRAMUTÃ"),
-       IDH=c(0.542, 0.484, 0.752, 0.626, 0.619, 0.624, 0.639, 0.582, 0.665, 
-             0.594, 0.650, 0.619, 0.655, 0.649, 0.453))
+IDH <-
+  tibble(
+    NM_MUNICIPIO = c(
+      "ALTO ALEGRE",
+      "AMAJARI",
+      "BOAVISTA",
+      "BONFIM",
+      "CANTÁ",
+      "CARACARAÍ",
+      "CAROEBE",
+      "IRACEMA",
+      "MUCAJAÍ",
+      "NORMANDIA",
+      "PACARAIMA",
+      "RORAINOPOLIS",
+      "SÃO JOÃO DA BALIZA",
+      "SÃO LUIZ",
+      "UIRAMUTÃ"
+    ),
+    IDH = c(
+      0.542,
+      0.484,
+      0.752,
+      0.626,
+      0.619,
+      0.624,
+      0.639,
+      0.582,
+      0.665,
+      0.594,
+      0.650,
+      0.619,
+      0.655,
+      0.649,
+      0.453
+    )
+  )
 ```
 
 __11) c)__ Juntar os dados de voto por partido de questão (a) com a tabela de HDI de questão (b). Verifique que o join deu certo para todas as observações, identifique o motivo pelos erros, e corrija os erros.
 
+```{r}
+
+IDH_corrigido <- IDH %>% mutate(
+  NM_MUNICIPIO = case_when(
+    NM_MUNICIPIO == "BOAVISTA" ~ "BOA VISTA",
+    NM_MUNICIPIO == "RORAINOPOLIS" ~ "RORAINÓPOLIS",
+    TRUE ~ NM_MUNICIPIO
+  )
+)
+
+
+idh_municipio_partido <-
+  left_join(votos_partido, IDH_corrigido, by = c("NM_MUNICIPIO")) %>% arrange(IDH)
+```
+
 
 __11) d)__ Crie um gráfico de pontos do IDH do município no eixo X por porcentagem de votos do partido PMDB no eixo Y. Adicione um título e rótulos nos eixos.
+
+```{r}
+idh_municipio_partido %>%
+  filter(SG_PARTIDO == "PMDB") %>%
+  ggplot() +
+  geom_point(aes(y = porcentagem_votos_partido_munic, x = IDH)) +
+  theme_light() +
+  labs(
+    x = "IDH",
+    y = "Porcentagem de votos \n recebidos pelo partido (%)",
+    title = "Porcentagem média de votos, dos(as) candidatos(as) \n para o cargo de vereador(a), e partido PMDB",
+    subtitle = "Na eleição de 2016 para o estado de RR"
+  ) 
+```
+
 
 
 __11) e)__ Ajuste o seu gráfico na questão (d) para que o tamanho do ponto mostra o total de votos que o PMDB recebeu no munícipio.
 
+```{r}
+idh_municipio_partido %>%
+  filter(SG_PARTIDO == "PMDB") %>%
+  ggplot() +
+  geom_point(aes(y = porcentagem_votos_partido_munic, x = IDH, size = total_votos_partido)) +
+  theme_light() +
+  labs(
+    x = "IDH",
+    y = "Porcentagem de votos \n recebidos pelo partido (%)",
+    title = "Porcentagem média de votos, dos(as) candidatos(as) \n para o cargo de vereador(a), e partido PMDB",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    size = "Número total de votos \n do partido no município"
+  ) 
+```
+
+
 __11) f)__ Ajuste o seu gráfico na questão (d) para que o cor dos pontos (em vez do tamanho) mostra o total de votos que o PMDB recebeu no munícipio. Aplique uma escala de cores apropriado da sua escolha.
+
+```{r}
+idh_municipio_partido %>%
+  filter(SG_PARTIDO == "PMDB") %>%
+  ggplot() +
+  geom_point(aes(y = porcentagem_votos_partido_munic, x = IDH, color = total_votos_partido)) +
+  scale_color_viridis_c(direction = -1) +
+  theme_light() +
+  labs(
+    x = "IDH",
+    y = "Porcentagem de votos \n recebidos pelo partido (%)",
+    title = "Porcentagem média de votos, dos(as) candidatos(as) \n para o cargo de vereador(a), e partido PMDB",
+    subtitle = "Na eleição de 2016 para o estado de RR",
+    color = "Número total de votos \n do partido no município"
+  ) 
+```
