@@ -1,0 +1,129 @@
+---
+title: "Exercícios Aula 8 -  Mapas e Analises Espaciais"
+author: "Beatriz Milz"
+date: "08/05/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center")
+```
+
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+library(knitr)
+library(sf)
+library(lwgeom)
+```
+
+
+## Exercício 1: Mapas de Pontos
+
+__1.__ Crie um objeto de simple features com os seguintes dados. Os valores de longitude e latitude são brutos em CRS 4326.
+
+```{r}
+dados_cidades <- tibble::tibble(
+  cidade = c("Paris", "London", "Istanbul", "Madrid", "Berlin"),
+  pais = c("France", "United Kingdom", "Turkey", "Spain", "Germany"),
+  populacao = c(12006868, 11984435, 11400000, 6633278, 5142247),
+  long = c(2.352552,-0.128285, 28.976636,-3.708597, 13.402067),
+  lat = c(48.85771, 51.50724, 41.00799, 40.41167, 52.52013)
+)
+
+dados_cidades_sf <-
+  dados_cidades %>% st_as_sf(coords = c("long", "lat"), crs = 4326)
+
+dados_cidades
+```
+
+
+
+__2.__ Visualize um mapa simples dos seus dados com ggplot(), com um cor diferente para cada ponto baseado na variável População.
+
+```{r}
+dados_cidades_sf %>% ggplot() +
+  geom_sf(aes(color = populacao))
+```
+
+
+__3.__ Quando criando o seu objeto sf, pode usar o argumento remove=FALSE para preservar as colunas de longitude e latitude explicitamente. Use essas duas colunas para adicionar mais uma camada de geometria que imprime os rótulos dos nomes das cidades ao seu mapa.
+
+
+```{r}
+dados_cidades %>% st_as_sf(coords = c("long", "lat"),
+                           crs = 4326,
+                           remove = FALSE) %>%
+  ggplot() +
+  geom_sf() +
+  geom_sf_label(aes(long, lat, label = cidade))
+
+
+```
+
+
+__4.__ Tirar os rótulos dos nomes das cidades e transforme os seus dados par a projeção com CRS 23035, e apresente um novo mapa.
+
+
+```{r}
+dados_cidades_sf %>% st_transform(crs = 23035) %>% 
+  ggplot() + 
+  geom_sf()
+```
+
+
+__5.__ Calcule o matriz da distância euclidiana entre os pontos.
+
+```{r}
+dados_cidades_sf_23025 <- dados_cidades_sf %>% st_transform(crs = 23035)
+
+
+dados_cidades_sf_23025 %>% st_distance()
+```
+
+## Exercício 2: Mapas mais Completos
+
+1. Abre o shapefile dos países da Europa no link aqui. Mostre um mapa simples usanda a projeção 23035
+
+```{r}
+europa <- sf::st_read("dados/Europe/Europe.shp")
+
+europa %>% st_transform(crs = 23035) %>% 
+  ggplot() +
+  geom_sf()
+```
+
+
+2. Adicione os dados das cidades do Exercício 1 ao seu mapa de Europa de Questão 1 e formate o mapa com um tema, título etc. apropriado.
+
+```{r}
+europa %>% st_transform(crs = 23035) %>% 
+  ggplot() +
+  geom_sf() +
+  geom_sf(data = dados_cidades_sf_23025) +
+  labs(title = "Mapa da Europa") +
+  theme_minimal()
+```
+
+
+3. Desenvolvendo o mesmo mapa, para cada país da Europa, visualize a população nacional (variável POP_EST) no mapa, com uma escala e legenda apropriada.
+
+```{r}
+europa %>% st_transform(crs = 23035) %>% 
+  mutate(pop_estimada = POP_EST/1000000) %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_estimada)) +
+  geom_sf(data = dados_cidades_sf_23025) +
+  # geom_sf_label(aes(label = POP_EST))
+  labs(title = "Mapa da Europa", fill = "População estimada \n (em milhões)") +
+  theme_minimal()
+```
+
+4. Queremos adicionar a próxima cidade na lista, Milão, mas não sabemos o longitude e latitude da cidade. Georeferencie o endereço de “Piazza del Duomo, 20122 Milano, Italy”, e (em vez de juntar com o banco de dados de cidades), adicione os resultados como mais uma camada do seu mapa de Questão 43 com a mesma formatação da camada do resto das cidades.
+

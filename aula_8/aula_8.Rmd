@@ -1,0 +1,173 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "01/05/2020"
+output:
+  html_document: null
+ # word_document: default
+code_folding: hide
+title: "Aula 8 - Mapas e Analises Espaciais"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(nycflights13)
+library(sf)
+
+# install.packages("lwgeom")
+library(lwgeom)
+
+# install.packages("tmaptools")
+library(tmaptools)
+
+# install.packages("mapview")
+library(mapview)
+```
+
+```{r}
+# airports
+
+airports_test <- airports %>% st_as_sf(coords=c("lon","lat"))
+
+class(airports_test)
+```
+
+```{r}
+airports_test %>% 
+  ggplot() +
+  geom_sf()
+```
+
+```{r}
+airports_test <- airports_test %>%
+  filter(tz < 0 & !(faa %in% c("EEN", "SYA")))
+
+airports_test %>%
+  ggplot() +
+  geom_sf()
+```
+
+```{r}
+airports <- airports %>% st_as_sf(coords=c("lon","lat"), 
+                                  crs=4326) %>% 
+  filter(tz<0 & !(faa %in% c("EEN", "SYA")))
+
+airports
+```
+
+```{r}
+airports %>% st_transform(3857) %>%
+  ggplot() +
+  geom_sf()
+
+```
+
+```{r}
+airports %>% st_transform(3751) %>%
+  ggplot() +
+  geom_sf()
+```
+
+
+```{r}
+airports %>% st_transform(54018) %>%
+  ggplot() +
+  geom_sf()
+```
+
+```{r}
+airports %>% sample_n(10) %>% 
+  st_distance()
+```
+
+```{r}
+airports %>% st_transform(54018) %>% 
+  sample_n(10) %>% 
+  st_distance()
+```
+
+## Trabalhando com Polígonos
+
+```{r}
+states <- st_read("dados/states_21basic/states.shp")
+
+states
+```
+
+
+
+```{r}
+states %>% ggplot() +
+  geom_sf()
+```
+
+```{r}
+states %>% st_transform(4326) %>%
+  ggplot() +
+  geom_sf() +
+  geom_sf(data = airports)
+```
+
+## Aperfecionando a Visualização dos mapas
+
+```{r}
+states %>% st_transform(4326) %>%
+  ggplot() +
+  geom_sf(colour="#756bb1") +
+  geom_sf(data=airports, size=0.5) +
+  ggtitle("Mapa de Aeroportos e Estados nos EUA")
+```
+
+```{r}
+states %>% st_transform(4326) %>%
+  ggplot() +
+  geom_sf(aes(fill=SUB_REGION), colour="#756bb1", alpha=0.2) +
+  scale_fill_brewer(palette="Set2") +
+  geom_sf(data=airports, aes(colour=alt), size=0.5) +
+  scale_colour_gradient(low="#00441b", high="#ef3b2c") +
+  ggtitle("Mapa de Aeroportos e Estados nos EUA")
+```
+
+```{r}
+states %>% st_transform(4326) %>%
+  ggplot() +
+  geom_sf(aes(fill=SUB_REGION), colour="#756bb1", alpha=0.2) +
+  scale_fill_brewer(palette="Set2") +
+  geom_sf(data=airports, aes(colour=alt), size=0.5) +
+  scale_colour_gradient(low="#00441b", high="#ef3b2c") +
+  ggtitle("Mapa de Aeroportos e Estados nos EUA") +
+  theme_minimal()
+```
+
+
+## Georeferenciamento
+
+
+```{r}
+Lugares <- tibble(
+  ID = c(1, 2),
+  Endereco = c(
+    "Av. Prof. Luciano Gualberto, 298-460 - Butantã, São Paulo, Brazil",
+    "Av. Paulista, 1578 - Bela Vista, São Paulo, Brazil"
+  )
+)
+
+ Lugares <- tmaptools::geocode_OSM(Lugares$Endereco, projection = 4326, as.sf = T)  # tá dando errado
+
+
+# Error in CPL_transform(x, crs, aoi, pipeline, reverse) : OGRCreateCoordinateTransformation() returned NULL: PROJ available?
+```
+
+## Mapas Interativos
+
+```{r}
+Lugares %>% mapview::mapview()
+```
+
+
