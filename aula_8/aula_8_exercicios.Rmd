@@ -127,3 +127,40 @@ europa %>% st_transform(crs = 23035) %>%
 
 4. Queremos adicionar a próxima cidade na lista, Milão, mas não sabemos o longitude e latitude da cidade. Georeferencie o endereço de “Piazza del Duomo, 20122 Milano, Italy”, e (em vez de juntar com o banco de dados de cidades), adicione os resultados como mais uma camada do seu mapa de Questão 43 com a mesma formatação da camada do resto das cidades.
 
+```{r}
+dados_italia <- tibble::tibble(
+  cidade = c("Milão"),
+  pais = c("Italia"),
+  endereco = c("“Piazza del Duomo, 20122 Milano, Italy”")
+)
+
+# tmaptools::geocode_OSM(dados_italia$endereco, projection = 4326, as.sf = T)
+
+# Não está dando certo a função geocode_OSM
+
+
+```
+
+## Exercício 3: Joins para Mapas
+
+
+1) Juntar os dois bancos de Cidades e Países Europeus usando o nome do país. O resultado deve ser os pontos das cidades. (Uma das nossas tabelas tem que ser um tibble simples (não sf), então use a função st_drop_geometry() para voltar a uma tabela simples). Mostre num mapa a população dos países de cada cidade.
+
+```{r}
+
+europa_s_geo <- europa %>% st_drop_geometry() 
+
+ left_join(dados_cidades_sf, europa_s_geo, by = c("pais" = "NAME")) %>%
+  ggplot() +
+  geom_sf(aes(fill = POP_EST))
+
+
+```
+
+
+2) Juntar os dois bancos de cidades e países Europeus usando um join espacial. O resultado deve ser os pontos das cidades. Reproduza o mapa de Questão 1.
+
+
+3) Juntar os dois bancos de cidades e países Europeus usando o nome do país. O resultado deve ser os polígonos dos países. Mostre num mapa a população das cidades metropolitanas.
+
+4) Juntar os dois bancos de cidades e países Europeus usando um join espacial. Reproduza o mapa de Questão 3.

@@ -28,6 +28,8 @@ library(tmaptools)
 
 # install.packages("mapview")
 library(mapview)
+
+library(raster)
 ```
 
 ```{r}
@@ -158,7 +160,7 @@ Lugares <- tibble(
   )
 )
 
- Lugares <- tmaptools::geocode_OSM(Lugares$Endereco, projection = 4326, as.sf = T)  # tá dando errado
+Lugares <- tmaptools::geocode_OSM(Lugares$Endereco, projection = 4326, as.sf = T)  # tá dando errado
 
 
 # Error in CPL_transform(x, crs, aoi, pipeline, reverse) : OGRCreateCoordinateTransformation() returned NULL: PROJ available?
@@ -167,7 +169,107 @@ Lugares <- tibble(
 ## Mapas Interativos
 
 ```{r}
-Lugares %>% mapview::mapview()
+# Lugares %>% mapview::mapview()  
 ```
+
+## Joins não espaciais
+
+```{r}
+flights_por_dest <- flights %>% group_by(dest) %>% 
+  tally()
+```
+
+
+```{r}
+airports_flights <- airports %>% rename(dest=faa) %>%
+  left_join(flights_por_dest, by="dest")
+```
+
+```{r}
+airports_flights %>% ggplot() +
+  geom_sf(aes(colour=n))
+```
+
+```{r}
+airports %>% rename(dest=faa) %>%
+  inner_join(flights_por_dest, by="dest") %>% 
+  ggplot() +
+  geom_sf(aes(colour=n))
+```
+
+## Joins Espaciais
+
+```{r}
+airports_states <- airports  %>% 
+  st_join(states %>% st_transform(4326))
+```
+
+
+```{r}
+airports_states %>% ggplot() + 
+  geom_sf(aes(colour=SUB_REGION))
+```
+
+```{r}
+states_airports <- states %>% st_transform(4326) %>% 
+  st_join(airports)
+```
+
+```{r}
+states_num_airports <- states_airports %>% group_by(STATE_NAME) %>% 
+  tally() 
+
+states_num_airports %>%
+  ggplot() +
+  geom_sf(aes(fill=n))
+```
+
+## Outras Operações Espaciais
+
+```{r}
+states_centroid <- states %>% st_centroid()
+
+states_centroid %>% ggplot() +
+  geom_sf()
+```
+
+
+## Rasters
+
+```{r}
+cambodia <- raster("dados/khm_popdenr_landscan_2011/khm_popdenr_landscan_2011.tif")
+
+cambodia
+
+```
+
+```{r}
+cambodia %>% as("SpatialPixelsDataFrame") %>%
+  as.data.frame() %>%
+  ggplot() +
+  geom_tile(aes(x = x, y = y, fill = khm_popdenr_landscan_2011))
+```
+
+```{r}
+cambodia %>% as("SpatialPixelsDataFrame") %>% 
+  as.data.frame() %>% 
+  ggplot() + 
+  geom_tile(aes(x=x,y=y,fill=khm_popdenr_landscan_2011)) +
+  theme_minimal() +
+  scale_fill_gradient(low="white",high="red",na.value="white", trans="log")
+```
+
+
+
+```{r}
+log(cambodia + 0.00001) %>%  
+  brick() %>% 
+  mapview(layer.name="khm_popdenr_landscan_2011")
+```
+
+
+
+
+
 
 
