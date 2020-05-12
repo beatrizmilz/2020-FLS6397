@@ -79,12 +79,12 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
     
 - [Aula 8 - Mapas e Análises Espaciais](https://jonnyphillips.github.io/Ciencia_de_Dados/Mapas.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8.Rmd)
-  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8_exercicios.html)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8_exercicios.html)
   - [ ]  Revisão dos exercícios (na semana seguinte)
   
-- [Aula 9 - Testes Estatísticos e Regressões](Testes Estatísticos e Regressões):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.Rmd)
-  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9_exercicios.html)
+- [Aula 9 - Testes Estatísticos e Regressões](https://jonnyphillips.github.io/Ciencia_de_Dados/Regressoes.html):
+  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.Rmd)
+  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9_exercicios.html)
   - [ ]  Revisão dos exercícios (na semana seguinte)
   - Leituras:
     - [ ]  [Introdução ao LaTeX](https://www.overleaf.com/learn/latex/Free_online_introduction_to_LaTeX_(part_1))

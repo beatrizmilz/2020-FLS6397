@@ -148,11 +148,14 @@ dados_italia <- tibble::tibble(
 
 ```{r}
 
-europa_s_geo <- europa %>% st_drop_geometry() 
+europa_s_geo <- europa %>% st_drop_geometry()
 
- left_join(dados_cidades_sf, europa_s_geo, by = c("pais" = "NAME")) %>%
+left_join(dados_cidades_sf, europa_s_geo, by = c("pais" = "NAME")) %>%
+  mutate(pop_estimada = POP_EST / 1000000) %>%
   ggplot() +
-  geom_sf(aes(fill = POP_EST))
+  geom_sf(aes(fill = pop_estimada)) +
+  labs(fill = "População estimada \n (em milhões)") +
+  theme_minimal()
 
 
 ```
@@ -160,7 +163,39 @@ europa_s_geo <- europa %>% st_drop_geometry()
 
 2) Juntar os dois bancos de cidades e países Europeus usando um join espacial. O resultado deve ser os pontos das cidades. Reproduza o mapa de Questão 1.
 
+```{r}
+st_join(dados_cidades_sf, europa) %>%
+  mutate(pop_estimada = POP_EST / 1000000) %>%
+  ggplot() +
+  geom_sf(aes(fill = pop_estimada)) +
+  labs(fill = "População estimada \n (em milhões)") +
+  theme_minimal()
+```
+
 
 3) Juntar os dois bancos de cidades e países Europeus usando o nome do país. O resultado deve ser os polígonos dos países. Mostre num mapa a população das cidades metropolitanas.
 
+```{r}
+europa %>%    st_transform(23035) %>% left_join(dados_cidades,  by = c("SOVEREIGNT"= "pais")) %>%
+  group_by(SOVEREIGNT) %>%
+  summarise(pop_total = sum(populacao, na.rm = TRUE)) %>%
+   mutate(pop_total_milhoes= pop_total / 1000000) %>%
+  ggplot() +
+  geom_sf(aes(fill = pop_total_milhoes))+
+  labs(fill = "População estimada \n (em milhões)") +
+  theme_minimal()
+```
+
+
 4) Juntar os dois bancos de cidades e países Europeus usando um join espacial. Reproduza o mapa de Questão 3.
+```{r}
+europa %>%  st_transform(23035) %>% 
+  st_join(dados_cidades_sf %>%  st_transform(23035),  by = c("SOVEREIGNT"= "pais")) %>%
+  group_by(SOVEREIGNT) %>%
+  summarise(pop_total = sum(populacao, na.rm = TRUE)) %>%
+   mutate(pop_total_milhoes= pop_total / 1000000) %>%
+  ggplot() +
+  geom_sf(aes(fill = pop_total_milhoes))+
+  labs(fill = "População estimada \n (em milhões)") +
+  theme_minimal()
+```
