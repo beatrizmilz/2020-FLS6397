@@ -20,6 +20,30 @@ library(tidyverse)
 library(nycflights13)
 library(broom)
 options(scipen=999)
+# install.packages("stargazer")
+library(stargazer)
+```
+
+```{r}
+# install.packages("survival")
+# install.packages("AER")
+# install.packages("Amelia")
+# install.packages("coda")
+# install.packages("Formula")
+# install.packages("geepack")
+# install.packages("sandwich")
+# install.packages("MatchIt")
+# install.packages("maxLik")
+# install.packages("MCMCpack")
+# install.packages("quantreg")
+# install.packages("survey")
+# install.packages("VGAM")
+```
+
+```{r}
+# install.packages("https://cran.r-project.org/src/contrib/Archive/Zelig/Zelig_5.1.6.tar.gz", repos=NULL, type="source")
+
+library(Zelig)
 ```
 
 ```{r}
@@ -92,5 +116,99 @@ flights %>% select(origin, carrier) %>%
   tidy()
 ```
 
+- Exercício 1: Testes Estatísticos
+
+## Regressões Simples
+
+```{r}
+flights %>% lm(dep_delay ~ dep_time, data = .)
+```
+
+```{r}
+flights %>% lm(dep_delay ~ dep_time, data=.) %>%
+  summary()
+```
+
+```{r}
+flights %>% lm(dep_delay ~ dep_time, data=.) %>%
+  tidy()
+```
+
+```{r}
+flights %>% lm(dep_delay ~ dep_time + origin, data=.) %>% tidy()
+```
+
+```{r}
+flights %>% lm(dep_delay ~ dep_time + I(dep_time^2), data=.) %>% tidy()
+```
+
+## Tabelas de Resultados de Regressões
+
+```{r, results='asis'}
+
+flights %>% lm(dep_delay ~ dep_time + origin, data=.) %>%
+  stargazer(type="html")
+```
+
+```{r, results='asis'}
+flights %>% lm(dep_delay ~ dep_time + origin, data=.) %>%
+  stargazer(type="html", title="Modelo de Atraso de Vôos",
+            single.row = T, keep.stat = c("n"),
+            dep.var.labels="Atraso",
+            covariate.labels=c("Horário", "JFK", "LGA"),
+            header=F, dep.var.caption="")
+```
+
+```{r, results='asis'}
+reg1 <- flights %>% lm(dep_delay ~ dep_time, data=.)
+reg2 <- flights %>% lm(dep_delay ~ dep_time + origin, data=.)
+
+list(reg1, reg2) %>% stargazer(type="html")
+```
+
+## Gráficos de Efeitos Marginais das Regressões
+
+```{r}
+reg2 %>% tidy() %>%
+  mutate(conf.lo=estimate-1.96*std.error,
+         conf.hi=estimate+1.96*std.error) %>%
+  filter(term!="(Intercept)") %>%
+  ggplot() +
+  geom_point(aes(x=term, y=estimate)) +
+  geom_errorbar(aes(x=term, y=estimate, ymin=conf.lo, ymax=conf.hi), width=0.1)
+```
+ 
+## Modelos Alternativos
+
+
+
+```{r}
+flights %>% zelig(dep_delay ~ dep_time + origin, data=., model="ls")
+```
+```{r}
+flights %>% mutate(atraso=case_when(dep_delay>0~1,
+                                    TRUE~0)) %>%
+  zelig(atraso ~ origin, data=., model="logit")
+```
+
+```{r}
+flights %>% mutate(atraso_serio=case_when(dep_delay>240 ~ 1,
+                                           TRUE ~ 0)) %>%
+  group_by(origin, month, day) %>%
+  summarize(atrasos_serios=sum(atraso_serio, na.rm=T))  %>%
+  ungroup() %>% 
+  zelig(atrasos_serios ~ origin, data=., model="poisson")
+```
+
+```{r results='asis'}
+flights %>% mutate(atraso=case_when(dep_delay>0~1,
+                                    TRUE~0)) %>%
+  zelig(atraso ~ origin, data=., model="logit") %>%
+  from_zelig_model() %>%
+  stargazer(type="html")
+```
+
+
+## Previsões e Resíduos de Regressões
 
 
