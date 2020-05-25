@@ -1,0 +1,90 @@
+\documentclass{beamer}
+
+\begin{document}
+
+\begin{frame} 
+\frametitle{Exercício 1: Praticando Latex} 
+Texto, conteúdo normal 
+Mais texto 
+\end{frame}
+
+
+
+\begin{frame} 
+\frametitle{Exercício 1: Praticando Latex} 
+
+1) Usando o formato “.Rnw”, crie um PDF com texto simples usando pelo menos cinco das formatações acima.\hfill\break
+
+Meu nome é \textbf{Beatriz Milz}, atualmente eu faço \texttt{doutorado} no \emph{PROCAM/IEE/USP}. \break
+
+
+Coisas que gosto:
+
+\begin{itemize}
+  \item Fazer parte de comunidades
+  \item Itens de papelaria
+  \item Completar tarefas atrasadas
+\end{itemize}
+
+
+Coisas para comprar quando for ao mercado:
+
+\begin{enumerate}
+  \item Café
+  \item Chocolate
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame} 
+\frametitle{Exercício 1: Praticando Latex} 
+2) Adicione a famosa equação de Pythagoras.
+
+$$a^{2} = b^{2} + c^{2} $$
+\end{frame}
+
+
+
+
+
+3) Adicione uma tabela simples usando o banco de dados de weather que mostra o total de precipitação por mês:
+
+<<message=FALSE, warning=FALSE>>=
+library(nycflights13)
+library(tidyverse)
+
+nycflights13::weather %>% 
+  group_by(month) %>%
+  summarise(total_precip = sum(precip, na.rm = FALSE)) %>%
+  knitr::kable(format = "latex", 
+               col.names = c("Mês", "Precipitação acumulada"),
+               align = "c", 
+               caption = "Precipitação acumulada por mês (inches)"
+               )
+@
+
+
+
+4) Adicione um gráfico simples usando o banco de dados weather que mostra a temperatura média por aeroporto.
+Verifique que o seu documento compila bem para PDF.
+
+<<fig.height=5>>=
+nycflights13::weather %>% 
+  group_by(origin) %>% 
+  summarise(t_media = mean(temp, na.rm = TRUE)) %>% 
+  ggplot() +
+  geom_col(aes(x = origin, y = t_media), fill = "lightblue") +
+  labs(
+    x = "Aeroporto",
+    y = "Temperatura média (ºF)"
+  ) 
+@
+
+
+
+5) Ajuste o seu script “.Rnw” acima para gerar uma apresentão do class ‘beamer’ e coloca o texto, a equação, a tabela, e o gráfico em slides diferentes. Compile para PDF de novo.
+
+\textbf{Resposta em outro arquivo. }
+
+\end{document}
