@@ -107,4 +107,4 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 - [x] [Desafio 3 - Combinação e Visualização de Dados](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_3_v4.html) - Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_3/desafio_3.Rmd)
 
 
-- [ ] [Desafio 4 - Replicabilidade, Sugestões e Trabalho Comunitário](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_4_v1.html) - entregar em __22/05/2020__.
+- [x] [Desafio 4 - Replicabilidade, Sugestões e Trabalho Comunitário](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_4_v1.html) - Entregue. Não irei commitar pois esse exercício é um code review de código de outra pessoa.
