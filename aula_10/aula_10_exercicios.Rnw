@@ -68,6 +68,40 @@ nycflights13::weather %>%
 
 5) Ajuste o seu script “.Rnw” acima para gerar uma apresentão do class ‘beamer’ e coloca o texto, a equação, a tabela, e o gráfico em slides diferentes. Compile para PDF de novo.
 
-\textbf{Resposta em outro arquivo. }
+\textbf{Testei e ficou bem desformatado. Prefiro xaringan! }
+
+
+\section*{Exercício 2: Usando Git}
+
+1) Crie um novo repositório na sua conta de Github e conectar (‘clonar’) com um novo projeto no seu RStudio.
+
+\textbf{O conteúdo de resolução dessa disciplina já está no GitHub }
+
+2) Copiar o seu script de Exercício 1 (o .Rnw) para a pasta local do seu projeto novo criado no passo anterior.
+
+\textbf{O conteúdo de resolução dessa disciplina já está no GitHub }
+
+3) Adicione mais um gráfico ao seu script, mostrando a humidade média por mês.
+
+<<fig.height=5>>=
+nycflights13::weather %>%
+  mutate(month = as.factor(month)) %>%
+  group_by(month) %>%
+  
+  summarise(humid_media = mean(humid, na.rm = TRUE)) %>%
+  ggplot() +
+  geom_col(aes(x = month, y = humid_media), fill = "lightblue") +
+  labs(x = "Mês",
+       y = "Umidade média") 
+@
+
+
+4) Commit a versão atualizada com uma descrição apropriada.
+
+\textbf{O conteúdo de resolução dessa disciplina já está no GitHub }
+
+5) Push as mudanças para o seu repositório de Github. Verifique que o novo arquivo está atualizado no repositório da sua conta de Github.
+
+\textbf{O conteúdo de resolução dessa disciplina já está no GitHub }
 
 \end{document}

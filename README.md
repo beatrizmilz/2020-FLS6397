@@ -93,7 +93,13 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
     
 - [Aula 10 - Reprodutibilidade](https://jonnyphillips.github.io/Ciencia_de_Dados/Reprodutibilidade.html):
   - [x]  Conteúdo da aula
-  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_10/aula_10_exercicios.pdf)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_10/aula_10_exercicios.pdf)
+  - [ ]  Revisão dos exercícios (na semana seguinte)
+  
+  
+- [Aula 11 - Funções e repetição](https://jonnyphillips.github.io/Ciencia_de_Dados/Repeticao.html):
+  - []  Conteúdo da aula
+  - [ ]   [Exercícios]()
   - [ ]  Revisão dos exercícios (na semana seguinte)
 
 ## Desafios
