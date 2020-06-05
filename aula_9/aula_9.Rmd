@@ -211,4 +211,31 @@ flights %>% mutate(atraso=case_when(dep_delay>0~1,
 
 ## Previsões e Resíduos de Regressões
 
+```{r}
+reg1 %>% augment()
+```
+
+## Simulações de Regressões
+
+```{r}
+flights  %>%
+  zelig(dep_delay ~ dep_time, data=., model="ls") %>% 
+  setx(dep_time=0500) %>%
+  sim()
+```
+
+```{r}
+flights  %>%
+  zelig(dep_delay ~ dep_time, data=., model="ls") %>% 
+  setx(dep_time=1700) %>%
+  sim()
+```
+
+```{r}
+flights  %>%
+  zelig(dep_delay ~ dep_time, data=., model="ls") %>% 
+  setx(dep_time=0500) %>%
+  setx1(dep_time=1700) %>%
+  sim()
+```
 

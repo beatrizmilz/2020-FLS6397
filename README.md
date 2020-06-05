@@ -98,7 +98,7 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
   
   
 - [Aula 11 - Funções e repetição](https://jonnyphillips.github.io/Ciencia_de_Dados/Repeticao.html):
-  - []  Conteúdo da aula
+  - [ ]  Conteúdo da aula
   - [ ]   [Exercícios]()
   - [ ]  Revisão dos exercícios (na semana seguinte)
 
