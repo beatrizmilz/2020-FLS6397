@@ -19,6 +19,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
 library(tidyverse)
 library(nycflights13)
 library(broom)
+library(stargazer)
+library(Zelig)
 options(scipen=999)
 ```
 
@@ -30,11 +32,11 @@ options(scipen=999)
 __Teste de normalidade__
 
 ```{r}
-vetor_normal <- rnorm(1000, 0, 1)
+rnorm(1000, 0, 1) %>% 
+  shapiro.test() %>%
+  broom::tidy()
 
-# vetor_normal %>% hist()
 
-shapiro.test(vetor_normal) %>% broom::tidy()
 ```
 
 
@@ -43,7 +45,11 @@ shapiro.test(vetor_normal) %>% broom::tidy()
 __Teste de média__
 
 ```{r}
-teste_media_2 <- planes %>% filter(manufacturer == "BOEING") %>% pull(year) %>% t.test(mu = 2000) %>%  tidy()
+teste_media_2 <- planes %>% 
+  filter(manufacturer == "BOEING") %>% 
+  pull(year) %>%
+  t.test(mu = 2000) %>%  
+  tidy()
 ```
 
 
@@ -62,11 +68,123 @@ __R:__ Não é diferente.
 __Comparar médias__
 
 ```{r}
-flights %>% mutate(velocidade = distance/air_time) %>% filter(origin %in% c("LGA", "EWR")) %>% 
-  t.test(velocidade ~ origin, data = .) %>% tidy()
+flights %>% 
+  mutate(velocidade = distance/air_time) %>% 
+  filter(origin %in% c("LGA", "EWR")) %>% 
+  t.test(velocidade ~ origin, data = .) %>% 
+  tidy()
 ```
 
 
 4) Usando o banco de dados weather, qual é a correlação entre temperatura e pressão?
 
+```{r}
+cor.test(~ temp + pressure, data = weather)
+```
+
+
 5) Crie um gráfico usando geom_errorbar() para comunicar o intervalo de confiança da estimativa de correlação em questão 4. Adicione uma linha horizontal para comparar com uma correlação de zero.
+
+```{r}
+
+# Não consegui terminar esse, olhei na resolução da aula. Não entendi pq filtra o origin, pois não é solicitado no exercício. Não filtrei.
+
+cor.test( ~ temp + pressure, data = weather) %>%
+  tidy() %>%
+  mutate(variavel = "Correlação") %>%
+  ggplot() +
+  geom_point(aes(x = variavel, y = estimate)) +
+  geom_hline(yintercept = 0,
+             lty = 2,
+             color = "blue") +
+  geom_errorbar(aes(x = variavel, ymin = conf.low, ymax = conf.high),
+                width = 0.1)
+```
+
+
+
+
+## Exercício 2: Regressões
+
+
+1) Usando uma regressão linear, qual é a associação entre precipitação (variável dependente) e as três variáveis pressão, temperatura e humidade no banco de dados weather? Qual dessas três variáveis tem relacionamente positivo com a variável dependente, e qual um relationamento negativo?
+
+
+```{r}
+# y = precipitação
+
+lm_1 <- lm(precip ~ pressure + temp + humid, weather)
+
+lm_1
+```
+
+__R:__ A variável umidade tem relacão positiva com a precipitação, e as variável pressão e temperatura tem relação negativa.
+
+
+2) Rode mais um modelo de regressão adicionando mais uma variável explicativa para o aeroporto de origin ao modelo de questão 1. Mostre os seus dois modelos juntos numa tabela apropriada.
+
+```{r}
+# y = precipitação
+
+lm_2 <- lm(precip ~ pressure + temp + humid + wind_speed, weather)
+
+
+
+lm_2 
+
+```
+
+```{r results='asis'}
+list(lm_1, lm_2) %>% stargazer(type = "html", align = TRUE)
+```
+
+
+
+3) Crie um gráfico de efeitos marginais para a sua regressão na questão 2.
+
+
+```{r}
+
+lm_2 %>% tidy() %>%
+  mutate(conf.lo = estimate - 1.96 * std.error,
+         conf.hi = estimate + 1.96 * std.error) %>%
+  filter(term != "(Intercept)") %>%
+  ggplot() +
+  geom_point(aes(x = term, y = estimate)) +
+  geom_errorbar(aes(
+    x = term,
+    y = estimate,
+    ymin = conf.lo,
+    ymax = conf.hi
+  ), width = 0.1)
+```
+
+
+
+4) Execute uma regressão do tipo ‘logit’ que explica se um vôo dure mais de três horas ou não (gere esta variável) baseado nas variáveis ‘dep_time’, ‘distance’ e ‘origin’.
+
+
+```{r results='asis'}
+modelo_3h <- flights %>% 
+  mutate(mais_de_3h = air_time > 180,
+         origin = as.factor(origin)) %>% 
+  zelig(mais_de_3h ~ dep_time + distance + origin, data = ., model = "logit")
+
+
+modelo_3h %>%
+  from_zelig_model() %>%
+  stargazer(type="html")
+
+```
+
+
+5) Use a sua regressão de questão 4 e as funções de Zelig para prever quanto mais provável é que um vôo seja mais de três horas de duração quando a distância aumenta de 700 para 1300 kilometros.
+
+
+```{r}
+modelo_3h %>% 
+  setx(distance=700) %>%
+  setx1(distance=1300) %>%
+  sim()
+```
+

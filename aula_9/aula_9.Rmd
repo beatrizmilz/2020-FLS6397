@@ -239,3 +239,20 @@ flights  %>%
   sim()
 ```
 
+```{r}
+diff_simulacoes <- flights  %>%
+  zelig(dep_delay ~ dep_time, data=., model="ls") %>% 
+  setx(dep_time=0500) %>%
+  setx1(dep_time=1700) %>% 
+  sim() %>% 
+  get_qi(xvalue="x1", qi="fd")
+```
+```{r}
+diff_simulacoes %>% as_tibble() %>% 
+  rename("Diff"=`1`) %>%
+  ggplot() +
+  geom_density(aes(x=Diff)) +
+  ggtitle("Atraso Média Adicional Estimada para voar as 17h em vez de 5h") +
+  theme_minimal()
+```
+

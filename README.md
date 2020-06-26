@@ -50,8 +50,8 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
   
 - [Aula 9 - Testes Estatísticos e Regressões](https://jonnyphillips.github.io/Ciencia_de_Dados/Regressoes.html):
-  - [ ]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.Rmd)
-  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9_exercicios.html)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.Rmd)
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9_exercicios.html)
 
     
     
