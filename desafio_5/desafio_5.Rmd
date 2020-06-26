@@ -1,0 +1,174 @@
+---
+title: 'Desafio 5: Análises Avançados de Tipos de Dados Diversos'
+author: "Beatriz Milz"
+output:
+  html_document:
+    code_folding: show
+    df_print: paged
+  word_document: default
+subtitle: "Entregar até 26/06/2020"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.align = "center")
+```
+
+HTML compilado em: `r format(Sys.Date(), format="%d de %B de %Y")`
+
+```{r echo=TRUE}
+## Carregar pacotes
+
+library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
+library(readxl) # pacote para ler arquivos excel
+
+library(geobr) # pacote para usar mapas do Brasil
+```
+
+## Roteiro
+
+### Mapas
+
+__1)__ Instale e abre o pacote geobr do IBGE. Leia as instruções no site de github do pacote e use a função read_municipality() para acessar todos os municípios do estado de São Paulo em 2018.
+
+```{r echo=TRUE, eval = FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+municipios_sp <- geobr::read_municipality("SP",year = 2018)
+```
+
+
+__2)__ Use a funcionalidade da família de map para aplicar a função read_municipality para cinco estados em uma linha única de código: SP, RJ, MT, RS e RN (todos para o ano de 2018).
+
+```{r}
+# Fazer depois de fazer a aula sobre purrr !!!
+```
+
+
+__3)__ Visualize um mapa simples usando ggplot dos municípios do estado de São Paulo. Formate o seu mapa e adicione um título. (Não precisa mostrar nenhum variável, só as fronteiras dos municípios).
+
+```{r}
+municipios_sp %>%
+  ggplot() +
+  geom_sf() +
+  theme_bw() +
+  labs(title = "Estado de São Paulo", caption = "Dados do pacote {geobr}. \n Ano de referência: 2018")
+```
+
+
+
+__4)__ Baixe, unzip e abre em R o arquivo da população paulista em 2010 do site do IBGE, ‘Censos’ -> ‘Censo_Demografico_2010’ -> ‘resultados’ -> ‘total_populacao_sao_paulo.zip’.
+
+```{r}
+total_populacao_sao_paulo <-
+  read_excel("dados/total_populacao_sao_paulo.xls") %>%
+  janitor::clean_names() # limpa o nome das variáveis
+```
+
+
+__5)__ Queremos mapear dados da população por município. Identifique o chave apropriado, e cruze o banco de população com o banco das fronteiras dos municípios de SP.
+
+```{r}
+# A chave - coluna em comum - é relacionada ao código do município
+
+# Essas duas variáveis precisam ser do mesmo tipo.
+typeof(municipios_sp$code_muni)
+typeof(total_populacao_sao_paulo$codigo_do_municipio)
+
+# Não são. Precisa padronizar via mutate :) Aproveito e deixo com o mesmo nome de variável.
+
+muni_sp_padronizado <- municipios_sp %>%
+  mutate(codigo_do_municipio = as.character(code_muni))
+
+# Usar left join e unir os dados
+
+mapa_sp_populacao <-
+  left_join(muni_sp_padronizado, total_populacao_sao_paulo)
+
+```
+
+
+__6)__ Usando o seu banco de dados de Questão 5, calcule a proporção da população urbana na população total em cada município e visualize um mapa bem-formatado dessa taxa por município em 2010. Aplique uma escala de cores desejada.
+
+```{r}
+mapa_sp_populacao %>% 
+  mutate(pop)
+```
+
+
+
+__7)__ Abre o shapeifle no arquivo MCMV_new.shp, que documenta a localização dos projetos de Minha Casa Minha Vida no Brasil, e o número de Unidades Habitacionais (UH) em cada projeto.
+
+
+__8)__ Verifique se a projeção (o CRS) dos dois bancos de dados espaciais (municípios e MCMV) são iguais, e, se necessário, padronize eles para um CRS da sua preferência.
+
+
+__9)__ Realize um spatial join para informar os dados de MCMV por município do estado de São Paulo, usando a localização dos projetos para juntar com os polígonos dos municípios.
+
+
+__10)__ Visualize um mapa do número de unidades habitacionais (UH) de MCMV por município de São Paulo (por polígono), e adicione uma segunda camada com a localização dos projetos de MCMV (os pontos). Formate o mapa e a escala de cores, e inclua um título.
+
+
+### Estatísticas
+
+__11)__ Imagine que os nossos dados são apenas uma amostra de todos os projetos de MCMV, e o governo de São Paulo se compremeteu a construir exatamente uma média de 600 unidades habitacionais por município. Avalie com a nossa amostra disponível se eles atingiram este objetivo com um t-test da média.
+
+
+__12)__ Queremos entender por que alguns municípios recebem mais unidades habitacionais (UH) do que outros. Execute uma regressão para avaliar se as seguintes variáveis são correlacionadas com o número de unidades habitacionais (UH): A taxa de população urbana e a população total em 2010. Mande o resultado para uma tabela bem-formatada,
+
+
+__13)__ Mostre um gráfico dos efeitos marginais da regressão em Questão 12 - o tamanho dos dois coefficientes e os seus intervalos de confiança.
+
+
+__14)__ Usando o banco de dados nacional de MCMV, use nest() para gerar um tibble ‘nested’ por estado. No seu tibble de resumo (com uma linha por estado) use a família de map para calcular o número de projetos em cada estado, e o número total de Unidades Habitacionais (UH) em cada estado como novas colunas.
+
+
+__15)__ O ‘Project_ID’ é um indicador (um proxy) de quando o projeto foi iniciado. Vamos rodar uma regressão para avaliar se projetos mais recentes (com ‘Project_ID’ maior) contém mais Unidades Habitacionais (UH). Use a família map e o seu tibble nested de Questão 14 para aplicar uma regressão por estado, e guarde os coefficientes e os p-values das regressões em colunas novas do tibble de resumo.
+
+### Análise de texto
+
+__16)__ Use o link aqui para acessar em R um PDF da discussão na Camara dos Deputados no dia 21 de Maio de 2020. Transforme o PDF em texto simples.
+
+
+__17)__ Precisamos processar e preparar o texto para a análise. Segue os seguintes passos:
+
+
+__17a)__ Insera o texto num tibble
+
+
+__17b)__ No PDF é possível ver que as falas dos deputados distintos sempre começam com ‘O SR.’ ou ‘A SRA.’ então vamos usar estes strings para dividir o texto por Deputado. Use str_split para dividir o texto baseado nos strings ‘O SR.’ ou ‘A SRA.’ e gera uma nova coluna.
+
+
+__17c)__ Em seguida, unnest() os dados para que cada fala de cada deputado é uma linha separado no tibble.
+
+
+__17d)__ Use separate para dividir a fala de cada deputado em duas colunas: O nome do Deputado, e o Discurso, usando o seguinte string como divisor: "\\) - "
+
+
+__17e)__ O resultado deve conter umas linhas em que a coluna ‘Deputado’ não é uma pessoa, mas começa com “Sessão”. Use filter para tirar essas linhas que começam com “Sessão” na coluna de ‘Deputado’.
+
+
+__17f)__ Ainda, o nome do deputado fica desarrumado por causa de conteúdo em parenteses. Para identificar os deputados únicos, use separate para dividir a coluna do nome de Deputado em o nome e o conteúdo nos parenteses (que não importa para nos), usando o seguinte string como divisor: " \\(".
+
+
+__17g)__ Tire as colunas desnecessárias para que temos apenas as duas colunas: Nome do Deputado, e Discurso.
+
+
+__18)__ Agora, com o tibble de Questão 17, vamos desaggregar e padronizar os discursos:
+
+
+__18a)__ ‘Tokenizar’ os discursos dos deputados em palavras únicas para que o seu tibble contém uma linha por palavra.
+
+
+__18b)__ Tire os stopwords de português. Se quiser, pode incluir mais stopwords que você acha não relevante para a análise.
+
+
+__18c)__ Transforme as palavras em suas raízes, os ‘stems’.
+
+
+__19)__ Gere um ‘wordcloud’ dos stems das palavras usados pelos Deputados.
+
+
+__20)__ Execute uma análise de sentimento para identificar no documento inteiro qual Deputado que usa as palavras mais otimistas e qual Deputado usa as palavras mais pessimistas.
+
+
+__21)__ No seu tibble de palavras e Deputados, gere um indicador binário da identidade do Deputado falando - se seja o Presidente da Câmara, ou qualquer outro Deputado (tratando todos juntos). Identifique as cinco palavras mais distintas de cada group (Presidente vs. outros).
