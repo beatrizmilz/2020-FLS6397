@@ -1,0 +1,230 @@
+---
+word_document: default
+author: "Beatriz Milz"
+date: "26/06/2020"
+output:
+  html_document: null
+ # word_document: default
+code_folding: hide
+title: "Aula 11 - Funções e Repetição"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+library(broom)
+```
+
+
+
+## Funções Customizadas
+
+```{r}
+amplitude <- function(x) {
+  resultado <- max(x, na.rm=T) - min(x, na.rm=T)
+  return(round(resultado, 0))
+}
+
+flights %>% pull(dep_delay) %>% amplitude()
+flights %>% pull(arr_delay) %>% amplitude()
+flights %>% pull(distance) %>% amplitude()
+```
+
+## Repetindo a aplicação de funções (map, map_df)
+
+```{r}
+amplitude <- function(x) {
+  resultado <- max(x, na.rm=T) - min(x, na.rm=T)
+  return(resultado)
+}
+
+resultado_lista <- flights %>% select(dep_delay, arr_delay, distance) %>% 
+  map(amplitude)
+
+resultado_lista
+
+class(resultado_lista)
+```
+
+```{r}
+resultado_tibble <- flights %>% select(dep_delay, arr_delay, distance, air_time) %>% 
+  map_df(amplitude)
+
+resultado_tibble
+```
+
+
+## Repetindo a aplicação de funções para vetores fora de um tibble
+
+
+
+```{r}
+flights %>% filter(month==1 & day==1) %>% write_csv("test1.csv")
+flights %>% filter(month==1 & day==2) %>% write_csv("test2.csv")
+
+arquivos <- c("test1.csv", "test2.csv")
+
+dados <- arquivos %>% map(read_csv)
+```
+
+
+```{r}
+dados2 <- arquivos %>% map_df(read_csv)
+
+dados3 <- arquivos %>% map(read_csv) %>%
+  bind_rows()
+```
+
+## Repetindo a aplicação de funções para uma lista
+
+```{r}
+# listas 
+objeto1 <- flights %>% filter(month==1 & day==1)
+objeto2 <- 3.14
+objeto3 <- flights %>% filter(month==1 & day==2)
+objeto4 <- "teste"
+
+lista_exemplo <- list(objeto1, objeto2, objeto3, objeto4)
+lista_exemplo
+```
+
+```{r}
+# listas 
+
+lista_exemplo_nomes <- list(
+  tibble1 = objeto1,
+  numero = objeto2,
+  tibble2 = objeto3,
+  string = objeto4
+)
+
+lista_exemplo_nomes
+
+lista_exemplo_nomes[["string"]]
+```
+
+```{r}
+# listas 
+flights_jan <- flights %>% filter(month==1)
+flights_fev <- flights %>% filter(month==2)
+
+flights_jan_fev <- list(janeiro=flights_jan, 
+                        fevereiro=flights_fev)
+
+flights_jan_fev %>% map(summarize, dep_delay=mean(dep_delay, na.rm=T))
+```
+```{r}
+flights_jan_fev %>% map_df(summarize, dep_delay=mean(dep_delay, na.rm=T))
+```
+
+```{r}
+flights_jan_fev %>% map_df(summarize, dep_delay=mean(dep_delay, na.rm=T),
+                           .id="Mês")
+```
+
+```{r}
+# for loops
+elementos <- c("dep_delay", "arr_delay", "distance")
+
+resultado <- c()
+
+for (i in elementos) {
+  resultado[i] <- flights %>% pull(i) %>% amplitude()
+}
+
+resultado
+```
+
+## Exercícios 1 - Repetição
+
+Resolução em outro arquivo :)
+
+## Gerando Novas Colunas com map e mutate  
+
+```{r}
+dados_nested <- tibble(dia=c(1, 2),
+                       file=c("test1.csv", "test2.csv")) %>% 
+  mutate(conteudo=map(file, read_csv))
+
+dados_nested
+```
+
+
+## Repetindo Funções com Tibbles Nested 
+
+```{r}
+dados_nested2 <- dados_nested %>% 
+  mutate(num_voos=map(conteudo, nrow))
+
+dados_nested2
+```
+
+```{r}
+dados_nested3 <- dados_nested %>% 
+  mutate(num_voos=map_dbl(conteudo, nrow))
+
+dados_nested3
+```
+```{r}
+corr_function <- function(tibble) {
+  tibble %>% cor.test(~ dep_delay + dep_time, data=.) %>%
+    tidy() %>%
+    pull(estimate)
+}
+
+dados_nested4 <- dados_nested %>% 
+  mutate(corr=map(conteudo, corr_function))
+
+dados_nested4
+```
+
+## Repetindo Análises
+
+```{r}
+dados_nested5 <- dados_nested %>%
+  mutate(regressao = map(conteudo, ~ lm(dep_delay ~ dep_time, data = .))) %>%
+  mutate(regressao = map(regressao, tidy))
+
+dados_nested5
+```
+
+```{r}
+dados_nested6 <- dados_nested5 %>% 
+  mutate(coef=map(regressao, filter, term=="dep_time"),
+         coef=map_dbl(coef, pull, estimate))
+
+dados_nested6
+```
+
+```{r}
+flights_reg_por_origem <- flights %>%
+  group_by(origin) %>%
+  nest() %>%
+  mutate(
+    regressao = map(data, ~ lm(dep_delay ~ dep_time, data = .)),
+    regressao = map(regressao, tidy),
+    coef = map(regressao, filter, term == "dep_time"),
+    coef = map_dbl(coef, pull, estimate)
+  )
+
+flights_reg_por_origem
+```
+
+## Mapeando argumentos múltiplos
+
+```{r}
+dados_nested7 <- dados_nested %>% mutate(formula=c("dep_delay ~ dep_time",
+                                  "arr_delay ~ dep_time"))
+
+dados_nested8 <- dados_nested7 %>% mutate(resultados=map2(formula, conteudo, lm))
+
+dados_nested8
+```
+
+## Exercício 2: Programação Funcional
+
+Em outro arquivo :)
