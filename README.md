@@ -39,18 +39,18 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
     
 - [Aula 7 - Juntando Bancos de Dados](https://jonnyphillips.github.io/Ciencia_de_Dados/Juntando_Bancos.html):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7.Rmd)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7.html
   - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7_exercicios.html)
 
     
     
 - [Aula 8 - Mapas e Análises Espaciais](https://jonnyphillips.github.io/Ciencia_de_Dados/Mapas.html):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8.Rmd)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8.html)
   - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_8/aula_8_exercicios.html)
 
   
 - [Aula 9 - Testes Estatísticos e Regressões](https://jonnyphillips.github.io/Ciencia_de_Dados/Regressoes.html):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.Rmd)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9.html)
   - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_9/aula_9_exercicios.html)
 
     
@@ -63,12 +63,12 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
   
   
 - [Aula 11 - Funções e repetição](https://jonnyphillips.github.io/Ciencia_de_Dados/Repeticao.html):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_11/aula_11.Rmd)
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_11/aula_11.html)
   - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_11/aula_11_exercicios.html)
 
 
 - [Aula 12 - Análise de texto](https://jonnyphillips.github.io/Ciencia_de_Dados/Analise_Texto.html):
-  - [ ]  Conteúdo da aula
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_12/aula_12.html)
   - [ ]   [Exercícios]()
 
 
