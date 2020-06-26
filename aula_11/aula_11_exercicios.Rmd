@@ -1,0 +1,108 @@
+---
+title: "Exercícios Aula 11 -  Funções e Repetição"
+author: "Beatriz Milz"
+date: "26/06/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: show
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center")
+```
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+## Exercício 1: Repetição
+
+
+1) Gere três tibbles seperados derivados do banco de dados flights, um para cada aeroporto de origem. Em seguida, coloque os três tibbles em uma lista (list()), com o nome de cada elemento da lista a sigla do aeroporto.
+
+```{r}
+
+bases_separadas <- split(x = flights, f = flights$origin)
+
+```
+
+
+2) Use map para calcular o número de linhas (vôos) em cada tibble.
+
+```{r}
+map(bases_separadas, nrow)
+```
+
+
+3) Filtre os três bancos de questão 1 para vôos com destino ‘SFO’ (San Francisco) usando map. Quantos vôos (linhas) têm cada aeroporto de Nova Iorque para SFO?
+
+```{r}
+bases_separadas %>% map(filter, dest == "SFO") %>% map(nrow)
+```
+
+
+
+4) Para cada um dos três bancos de dados, calcule a velocidade de cada vôo usando map.
+
+```{r}
+bases_separadas_2 <- bases_separadas %>% map(mutate, velocidade = distance/air_time)
+```
+
+
+5) Resume cada um dos três bancos para calcular a média da velocidade dos vôos usando uma função da família map. O resultado deve ser um tibble com todos os detalhes apropriados.
+
+```{r}
+bases_separadas_2 %>% map_df(summarise,
+                             velocidade_media = mean(velocidade, na.rm = TRUE),
+                             .id = "Origem")
+```
+
+## Exercício 2: Programação Funcional
+
+
+1) Gere um tibble ‘nested’ com uma linha para cada mês usando o banco de dados weather.
+
+```{r}
+nested <- weather %>% group_by(month) %>% nest()
+
+nested
+```
+
+
+2) Adicione uma coluna ao tibble gerado em questão 1 que mostra o número de observações em cada mês.
+
+```{r}
+nested2 <- nested %>% mutate(n_linhas = map_dbl(data, nrow))
+
+nested2
+```
+
+3) Usando o seu banco de dados nested, execute uma regressão para cada mês separadamente, com ‘precip’ (chuva) na variável dependente e ‘temp’ (temperatura) na variável independente. Salve o coeficiente da variável temperatura numa coluna nova.
+
+```{r}
+nested2 %>% mutate(regressao = map(data, ~lm(precip ~ temp, data = .)),
+                   tidy_regressao = map(regressao, broom::tidy),
+                   regressao_temp = map(tidy_regressao, filter, term=="temp"),
+                   coef = map_dbl(regressao_temp, pull, estimate))
+```
+
+
+
+4) Separe a coluna de temperatura de cada mês em uma nova coluna nested como um vetor para cada mês, e aplique um teste shapiro (veja tutorial 9, shapiro.test) de normalidade para a temperatura de cada mês, processando o resultado para que o valor ‘p’ seja visível no tibble de resumo por mês.
+
+```{r}
+# Não terminei sozinha, olhei a resolução
+
+
+nested %>% mutate(
+  temp = map(data, pull, temp),
+  test = map(temp, shapiro.test),
+  tidy_test = map(test, broom::tidy),
+  p_value = map_dbl(tidy_test, pull, p.value)
+)
+```
+

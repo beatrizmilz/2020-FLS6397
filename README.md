@@ -64,7 +64,7 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
   
 - [Aula 11 - Funções e repetição](https://jonnyphillips.github.io/Ciencia_de_Dados/Repeticao.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_11/aula_11.Rmd)
-  - [ ]   [Exercícios]()
+  - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_11/aula_11_exercicios.html)
 
 
 - [Aula 12 - Análise de texto](https://jonnyphillips.github.io/Ciencia_de_Dados/Analise_Texto.html):
