@@ -1,0 +1,61 @@
+---
+title: "Exercícios Aula 12 -  Análise de texto"
+author: "Beatriz Milz"
+date: "26/06/2020"
+output:
+  html_document:
+    df_print: paged
+    code_folding: show
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center")
+```
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+library(stringr)
+library(wordcloud)
+```
+
+## Exercício 1: Trabalhando com Strings 
+
+1) No banco de dados airlines do pacote nycflights13, qual porcentagem dos nomes das companhias aéreas contém a palavra ‘Airlines’ e qual porcentagem contém a palavra ‘Airways’?
+
+```{r}
+nycflights13::airlines %>% mutate(
+  contem_airlines = stringr::str_detect(name, "Airlines"),
+  contem_airways = stringr::str_detect(name, "Airways")
+)   %>% summarize(
+  porcentagem_airlines = sum(contem_airlines) / nrow(.) * 100,
+  porcentagem_airways = sum(contem_airways)*100 /
+    nrow(.),
+)
+```
+
+
+2) No mesmo banco, Substitua os nomes das companhias aéreas que contém ‘Inc.’ com ‘Incorporated’, e eles que contém ‘Co.’ com ‘Company’. (Observe que ‘.’ é um caracter especial, então tem que buscar ele com ‘\\.’).
+
+```{r}
+nycflights13::airlines %>% mutate(novo_nome = stringr::str_replace_all(name, "Inc\\.", "Incorporated"),
+                                  novo_nome = stringr::str_replace_all(novo_nome, "Co\\.", "Company"),
+                                  )
+```
+
+3) Gere um nome curto para cada companhia aérea, refletindo apenas a primeira palavra do nome.
+```{r}
+nycflights13::airlines %>% mutate(nome_curto = stringr::str_split(name, " ")) %>% 
+  mutate(nome_parcial_primeiro=map_chr(nome_curto, 1))
+```
+
+
+4) Crie um ‘wordcloud’ dos nomes das companhias aéreas.
+
+```{r}
+wordcloud(airlines$name)
+```
+
+

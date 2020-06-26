@@ -69,7 +69,7 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
 - [Aula 12 - Análise de texto](https://jonnyphillips.github.io/Ciencia_de_Dados/Analise_Texto.html):
   - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_12/aula_12.html)
-  - [ ]   [Exercícios]()
+  - [ ]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_12/aula_12_exercicios.html)
 
 
 
