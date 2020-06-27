@@ -15,10 +15,27 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
 ```
 
 ```{r}
-library(nycflights13)
 library(tidyverse)
-library(stringr)
+library(nycflights13)
+library(pdftools)
+#install.packages("wordcloud")
+#install.packages("tm")
 library(wordcloud)
+library(tm)
+library(wordcloud2)
+#install.packages("gutenbergr")
+library(gutenbergr)
+library(tidytext)
+#install.packages("textstem")
+library(textstem)
+#install.packages("lexiconPT")
+library(lexiconPT)
+library(zoo)
+#install.packages("topicmodels")
+library(topicmodels)
+library(broom)
+#devtools::install_github("abjur/abjutils")
+library(abjutils)
 ```
 
 ## Exercício 1: Trabalhando com Strings 
@@ -58,4 +75,118 @@ nycflights13::airlines %>% mutate(nome_curto = stringr::str_split(name, " ")) %>
 wordcloud(airlines$name)
 ```
 
+## Exercício 2: Analisando um Documento
+
+
+1) Escolhe um livro da sua preferência no site de Projeto Gutenberg, e abre ele em R usando o código do projeto.
+```{r}
+camoes <- gutenberg_download(3333) %>%
+  mutate(text = iconv(text, from = "latin1", to = "UTF-8")) %>%
+  select(-gutenberg_id) %>%
+  rownames_to_column("linha")
+
+```
+
+
+2) ‘Tokenizar’ o seu livro em palavras, tirando a puntuação, os números, os stopwords, virando as caracteres em minúsculo, e as palavras em seus stems (raízes).
+
+```{r}
+camoes_token <- camoes %>%
+  unnest_tokens(palavra, text, strip_numeric = TRUE) %>%
+  mutate(palavra_sem_acento = abjutils::rm_accent(palavra))  %>% mutate(stem =                                                         stem_words(palavra, language = "pt"))
+
+  
+stopwords <- get_stopwords(language="pt") %>%
+rename(palavra=word) %>% add_row(palavra=c("é", "de", "e", "o"), lexicon="pessoal")
+
+
+
+camoes_sem_stop <- camoes_token %>% anti_join(stopwords, by="palavra")
+
+camoes_sem_stop %>% group_by(palavra_sem_acento) %>%  tally() %>% arrange(-n) %>% top_n(10)
+
+```
+
+
+
+3) Identifique os dez stems mais frequentes no seu livro.
+
+```{r}
+camoes_sem_stop %>% group_by(stem) %>%  tally() %>% arrange(-n) %>% top_n(10)
+```
+
+
+4) Aplique uma análise de sentimento ao texto para identificar as linhas mais otimistas e mais pessimistas do texto.
+
+```{r}
+sentimento <- oplexicon_v3.0 %>% 
+  mutate(palavra_sem_acento = abjutils::rm_accent(term)) %>% 
+  select(palavra_sem_acento, polarity) 
+
+camoes_sentimento <- camoes_sem_stop %>% left_join(sentimento)
+
+
+camoes_sentimento  %>% mutate(linha=as.numeric(linha)) %>%
+  group_by(linha) %>%
+  summarize(sum_polarity = sum(polarity, na.rm=T)) %>%
+  arrange(-sum_polarity) %>%
+  slice(1, n())
+```
+```{r}
+camoes %>% filter(linha==7891) %>% pull(text) #Linha mais otimista
+
+
+camoes %>% filter(linha==7999) %>% pull(text) #Linha mais pessimista
+```
+
+## Exercício 3: Comparando Documentos
+
+1) Copiar-colar um texto que você mesmo escreveu de pelo menos um parágrafo e salve ele dentro de um tibble em R.
+
+```{r}
+texto <- tibble(texto = "Meu nome é Beatriz, e meu pronome é “ela”. Atualmente sou doutoranda em Ciência Ambiental (PROCAM/IEE/USP) na Universidade de São Paulo. Sou pesquisadora no Projeto Temático FAPESP MacroAmb - Governança ambiental da Macrometrópole Paulista face à variabilidade climática. Faço parte voluntariamente da equipe da Secretaria Executiva da Revista Ambiente & Sociedade, uma revista científica Brasileira que é referência em estudos interdisciplinares sobre ambiente e sociedade. Comecei a aprender R em agosto de 2018, e recentemente comecei a aprender Python. Sou co-organizadora da R-Ladies São Paulo, uma comunidade que tem como objetivo promover a diversidade de gênero na comunidade da linguagem R. Também participo da comunidade PyLadies São Paulo, que tem como objetivo unir mulheres em torno do mundo da programação, especialmente usando Python. Sou instrutora da Carpentries, um projeto que tem como missão ensinar habilidades de ciência de dados para pessoas pesquisadoras.")
+```
+
+
+2) ‘Tokenizar’ o seu texto em palavras, tirando a puntuação, os números, os stopwords, virando as caracteres em minúsculo, e as palavras em seus raízes (stems).
+
+```{r}
+texto_token <- texto %>%
+  unnest_tokens(palavra, texto, strip_numeric = TRUE) %>%
+  mutate(palavra_sem_acento = abjutils::rm_accent(palavra))  %>% mutate(stem = stem_words(palavra, language = "pt"))%>% anti_join(stopwords, by="palavra")
+
+head(texto_token)
+```
+
+
+3) Junte dois textos tokenizados em um tibble com uma coluna que diferencia o documento e uma coluna que conta a frequência de cada palavra: (i) o texto seu que você identificou acima em questão 1, e (ii) o livro que você usou em exercício 2.
+
+```{r}
+meu_texto_tally <- texto_token %>% 
+  group_by(palavra_sem_acento) %>% 
+  tally() %>%
+  mutate(document = "Meu texto")
+
+camoes_tally <- camoes_sem_stop %>% 
+  group_by(palavra_sem_acento) %>% 
+  tally() %>%
+  mutate(document = "Camões")
+
+df_textos <- bind_rows(meu_texto_tally, camoes_tally)
+
+
+```
+
+
+
+4) Calcule a medida ‘tf_idf’ para identificar as 5 palavras mais distintas de cada documento. Em qual sentido o seu documento é diferente do livro?
+
+```{r}
+textos_idf <- df_textos %>% bind_tf_idf(palavra_sem_acento, document, n)
+
+
+textos_idf %>%
+  group_by(document) %>%
+  top_n(5, tf_idf)
+```
 
