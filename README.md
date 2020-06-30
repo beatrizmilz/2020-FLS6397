@@ -39,7 +39,7 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
     
 - [Aula 7 - Juntando Bancos de Dados](https://jonnyphillips.github.io/Ciencia_de_Dados/Juntando_Bancos.html):
-  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7.html
+  - [x]  [Conteúdo da aula](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7.html)
   - [x]   [Exercícios](https://beatrizmilz.github.io/2020-FLS6397/aula_7/aula_7_exercicios.html)
 
     
@@ -91,4 +91,4 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
 ## Projeto Final
 
-- [ ]  Fazer até 24 de julho de 2020!
+- [ ]  Em desenvolvimento [neste link](https://beatrizmilz.github.io/2020-FLS6397/projeto_final/) - Fazer até 24 de julho de 2020!
