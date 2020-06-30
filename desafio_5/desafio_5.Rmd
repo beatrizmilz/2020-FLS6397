@@ -27,6 +27,7 @@ library(geobr) # pacote para usar mapas do Brasil
 library(sf) # pacote para mapas
 library(broom)
 library(pdftools)
+library(stringr)
 ```
 
 ## Roteiro
@@ -228,9 +229,22 @@ mcmv %>%
 __16)__ Use o link aqui para acessar em R um PDF da discussão na Camara dos Deputados no dia 21 de Maio de 2020. Transforme o PDF em texto simples.
 
 ```{r}
-# url <- "https://escriba.camara.leg.br/escriba-servicosweb/pdf/59638"
-# 
-# pdf_text(url)
+url <- "https://escriba.camara.leg.br/escriba-servicosweb/pdf/59638"
+
+texto_camara <- pdf_text(url) # cada página vira um elemento no vetor
+
+
+texto_camara_pasted <-
+  paste(texto_camara, collapse = " ") %>% # juntei todas as páginas em um único elemento. Assim não quebra por página.
+  str_remove_all("Sessão de: 21/05/2020") %>% # retira texto que está em todas as páginas
+  str_remove_all("Notas Taquigráficas") %>%  # retira texto que está em todas as páginas
+  str_remove_all("CONGRESSO NACIONAL") %>%  # retira texto que está em todas as páginas
+  str_remove_all("ORDEM DO DIA") %>% #divisões da ata
+  str_remove_all("ENCERRAMENTO") %>% #divisões da ata
+  str_replace_all("\r\n", " ") %>% #substitui \r\n por espaço.
+  str_squish() # retira espaço desnecessário da string
+
+
 ```
 
 __17)__ Precisamos processar e preparar o texto para a análise. Segue os seguintes passos:
@@ -238,11 +252,28 @@ __17)__ Precisamos processar e preparar o texto para a análise. Segue os seguin
 
 __17a)__ Insera o texto num tibble
 
+```{r}
+tibble_camara <- texto_camara_pasted %>% as_tibble()
+
+```
+
+
 
 __17b)__ No PDF é possível ver que as falas dos deputados distintos sempre começam com ‘O SR.’ ou ‘A SRA.’ então vamos usar estes strings para dividir o texto por Deputado. Use str_split para dividir o texto baseado nos strings ‘O SR.’ ou ‘A SRA.’ e gera uma nova coluna.
 
+```{r}
+camara_splited <-
+  tibble_camara %>% mutate(separado = str_split(value, pattern = "O SR.|A SRA."))
+
+```
+
+
 
 __17c)__ Em seguida, unnest() os dados para que cada fala de cada deputado é uma linha separado no tibble.
+
+```{r}
+camara_splited %>% unnest(cols = c(separado)) %>% select(-value)
+```
 
 
 __17d)__ Use separate para dividir a fala de cada deputado em duas colunas: O nome do Deputado, e o Discurso, usando o seguinte string como divisor: "\\) - "
