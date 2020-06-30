@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, message =  FALSE)
 ```{r include=FALSE}
 library(readxl)
 library(tidyverse)
+library(sf)
 ```
 
 - Dados para os anos 2016, 2017 e 2018, da CETESB, sobre saneamento por município no estado de SP.
@@ -138,13 +139,20 @@ Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde com o 6
 # ------
 ```{r include=FALSE}
 library(geobr)
-  brasil_geo <- geobr::read_country()
+geobr::list_geobr()
+brasil_geo <- geobr::read_country()
 estado_sp <- geobr::read_state(code_state = 35)
 estado_mg <- geobr::read_state(code_state = "MG")
-muni_sp <- read_municipality(code_muni= "SP", year=2018)
-muni_mg <- read_municipality(code_muni= "MG", year=2018)
+muni_sp <- read_municipality(code_muni = "SP", year = 2018)
+muni_mg <- read_municipality(code_muni = "MG", year = 2018)
 
 muni_sp_mg <- rbind(muni_sp, muni_mg)
+
+# ggplot +
+#   geom_sf(data = estado_sp,  aes(x = geom),         fill = "lightgray",
+#           show.legend = TRUE)
+# 
+# library(tidyverse)
 
 ```
 
@@ -228,7 +236,7 @@ ggplot() +
           show.legend = TRUE) +
   #  geom_sf(data=estado_mg, fill = "gray")+
   geom_sf(data = mapa_2018_mmp_daee, aes(fill = nome_ugrhi), color = NA) +
-      geom_sf(data = sp_ugrhi, fill = NA, alpha = 0.5)+
+    #  geom_sf(data = sp_ugrhi, fill = NA, alpha = 0.5)+
       
       # theme_minimal() +
       labs(fill = "UGRHI",
