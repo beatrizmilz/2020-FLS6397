@@ -25,6 +25,8 @@ library(readxl) # pacote para ler arquivos excel
 library(purrr) # pacote para programação funcional
 library(geobr) # pacote para usar mapas do Brasil
 library(sf) # pacote para mapas
+library(broom)
+library(pdftools)
 ```
 
 ## Roteiro
@@ -154,23 +156,82 @@ mcmv_sp <- mcmv %>% filter(UF == "SP")
 
 __11)__ Imagine que os nossos dados são apenas uma amostra de todos os projetos de MCMV, e o governo de São Paulo se compremeteu a construir exatamente uma média de 600 unidades habitacionais por município. Avalie com a nossa amostra disponível se eles atingiram este objetivo com um t-test da média.
 
+```{r}
+mcmv_sp %>%
+  pull(UH) %>%
+  t.test(mu=600) 
+```
+__R:__ Não atingiram o objetivo. Hipótese nula refutada, hipótese alternativa aceita (a média real é diferente de 600).
 
-__12)__ Queremos entender por que alguns municípios recebem mais unidades habitacionais (UH) do que outros. Execute uma regressão para avaliar se as seguintes variáveis são correlacionadas com o número de unidades habitacionais (UH): A taxa de população urbana e a população total em 2010. Mande o resultado para uma tabela bem-formatada,
 
+__12)__ Queremos entender por que alguns municípios recebem mais unidades habitacionais (UH) do que outros. Execute uma regressão para avaliar se as seguintes variáveis são correlacionadas com o número de unidades habitacionais (UH): A taxa de população urbana e a população total em 2010. Mande o resultado para uma tabela bem-formatada.
+
+```{r}
+mapa_sp_pop_mcmv <- st_join(mapa_sp_populacao %>% st_transform(4326), mcmv_sp)
+
+lm_mcmv <- lm(UH ~ total_da_populacao_2010 + total_da_populacao_urbana, data = mapa_sp_pop_mcmv) 
+
+lm_mcmv %>% tidy()
+
+```
+
+__R:__  As variáveis estão correlacionadas, municicípios com maior população recebem maiores unidades habitacionais do MCMV.
 
 __13)__ Mostre um gráfico dos efeitos marginais da regressão em Questão 12 - o tamanho dos dois coefficientes e os seus intervalos de confiança.
 
+```{r}
+lm_mcmv %>% tidy() %>%
+  mutate(conf.lo=estimate-1.96*std.error,
+         conf.hi=estimate+1.96*std.error) %>%
+  filter(term!="(Intercept)") %>%
+  ggplot() +
+  geom_point(aes(x=term, y=estimate)) +
+  geom_errorbar(aes(x=term, y=estimate, ymin=conf.lo, ymax=conf.hi), width=0.1)
+```
 
 
 __14)__ Usando o banco de dados nacional de MCMV, use nest() para gerar um tibble ‘nested’ por estado. No seu tibble de resumo (com uma linha por estado) use a família de map para calcular o número de projetos em cada estado, e o número total de Unidades Habitacionais (UH) em cada estado como novas colunas.
 
+```{r}
+mcmv %>% 
+  group_by(UF)  %>%
+  nest() %>%
+  mutate(uh_estado = map(data, pull, UH),
+         id_estado = map(data, pull, Project_ID),
+         uh_soma = map_dbl(uh_estado, sum,  na.rm = TRUE),
+         id_contagem = map_dbl(id_estado, length)
+         ) %>% 
+  select(-id_estado, -uh_estado)
+```
+
+
 
 __15)__ O ‘Project_ID’ é um indicador (um proxy) de quando o projeto foi iniciado. Vamos rodar uma regressão para avaliar se projetos mais recentes (com ‘Project_ID’ maior) contém mais Unidades Habitacionais (UH). Use a família map e o seu tibble nested de Questão 14 para aplicar uma regressão por estado, e guarde os coefficientes e os p-values das regressões em colunas novas do tibble de resumo.
+
+```{r}
+mcmv %>% 
+  group_by(UF)  %>%
+  nest() %>% 
+  mutate(modelo =  map(data, ~lm(.x$UH ~ .x$Project_ID)),
+         modelo_broom = map(modelo, broom::tidy),
+        modelo_pvalue = map(modelo_broom, pull, p.value),
+        modelo_estimate = map(modelo_broom, pull, estimate),
+        modelo_term = map(modelo_broom, pull, term)
+        ) %>% 
+  unnest(modelo_term, modelo_pvalue, modelo_estimate)
+
+```
+
 
 ### Análise de texto
 
 __16)__ Use o link aqui para acessar em R um PDF da discussão na Camara dos Deputados no dia 21 de Maio de 2020. Transforme o PDF em texto simples.
 
+```{r}
+# url <- "https://escriba.camara.leg.br/escriba-servicosweb/pdf/59638"
+# 
+# pdf_text(url)
+```
 
 __17)__ Precisamos processar e preparar o texto para a análise. Segue os seguintes passos:
 
