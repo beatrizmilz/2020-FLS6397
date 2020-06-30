@@ -1,0 +1,141 @@
+---
+title: "Projeto final da disciplina FLS6397"
+subtitle: "Introdução à Análise de Dados, Programação e Visualização para as Ciências Sociais"
+author: "Beatriz Milz - Nº 7974879"
+date: "`r format(Sys.Date(), format='%d de %B de %Y')`"
+output:
+  tufte::tufte_html:
+#    tufte_features: ["fonts", "background"]
+    tufte_variant: "envisioned"
+    css: "complemento.css"
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: pacotes.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, 
+                      cache.extra = packageVersion('tufte'),
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.align = "center")
+options(htmltools.dir.version = FALSE)
+```
+
+
+## Introdução
+
+Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmarkdown2018; @R-rmarkdown] e o modelo `{tufte}` [@R-tufte].
+
+## Pacotes necessários
+
+```{r}
+library(tidyverse)
+library(geobr)
+# install.packages("pdftables")
+library(pdftables)
+library(readr)
+```
+
+
+## Dados utilizados
+
+- __Dados de Saneamento: __ A Companhia Ambiental do Estado de São Paulo (CETESB)^[https://cetesb.sp.gov.br/] publica todos os anos o "Relatório de Qualidade das Águas Interiores do Estado de São Paulo". Desde o relatório referente ao ano de 2016, é publicado o __Apêndice C__, que contém __dados de saneamento por município__ do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).
+
+- __Dados de municípios que fazem parte da MMP:__ ...
+
+- __Dados shapefile dos municípios:__ Foi utilizado o pacote `{geobr}` [@R-geobr], que possibilita acessar dados espaciais oficiais do Brasil.
+
+## Abrir e arrumar as bases
+
+- Fazer o download do PDF e converter em CSV:
+
+```{r}
+url <- "https://cetesb.sp.gov.br/aguas-interiores/wp-content/uploads/sites/12/2019/10/Ap%C3%AAndice-C_Dados-de-Saneamento-por-Munic%C3%ADpio.pdf" # link do apêndice C para o ano de 2018
+
+# download.file(url, destfile = "dados/apendice_c_2018.pdf", method = "curl") # Faz o download do PDF 
+
+#pdftables::convert_pdf("dados/apendice_c_2018.pdf", output_file = "dados/apendice_c_2018.csv", api_key = "xhtlrqbqfaf7")
+```
+
+- Abrir a base:
+```{r}
+
+apendice_c_2018 <-
+  read_csv(
+    "dados/apendice_c_2018.csv",
+      col_names = c(
+    "ugrhi",
+    "municipio",
+    "consessao",
+    "pop_urbana",
+    "atendimento_coleta_porc",
+    "atendimento_tratamento_porc",
+    "eficiencia",
+    "carga_poluidora_potencial",
+    "carga_poluidora_remancescente",
+    "ictem",
+    "corpo_receptor"
+  ),
+    locale = locale(encoding = "ISO-8859-1"),
+    skip = 5
+  )
+
+```
+
+- A base deve conter 645 linhas, referente ao número de municípios no estado de São Paulo:
+
+```{r}
+nrow(apendice_c_2018)
+```
+
+
+
+- Retirar linhas que só contém NA, e linhas que não tem dados dos municípios:
+
+```{r}
+apendice_c_filtrado <- apendice_c_2018 %>% 
+  filter_all(any_vars(!is.na(.))) %>% 
+  filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) 
+```
+
+- Verificar o tipo de dados nas colunas:
+
+```{r}
+glimpse(apendice_c_filtrado)
+```
+
+- Algumas colunas são de dados numéricos mas que estão como texto, portanto deve ser convertido:
+
+```{r}
+apendice_c <- apendice_c_filtrado %>%
+  mutate(
+    pop_urbana = as.double(pop_urbana),
+    atendimento_coleta_porc = as.double(atendimento_coleta_porc),
+    atendimento_tratamento_porc = as.double(atendimento_tratamento_porc),
+    carga_poluidora_potencial = as.double(carga_poluidora_potencial),
+    carga_poluidora_remancescente = as.double(carga_poluidora_remancescente),
+      # ictem = as.double(ictem), # Verificar isso
+  )
+```
+
+
+- Verificar novamente o tipo de dados nas colunas:
+
+```{r}
+glimpse(apendice_c)
+```
+
+## Referências
+
+```{r bib, include=FALSE}
+# create a bib file for the R packages used in this document
+knitr::write_bib(c(.packages(), 'base', 'rmarkdown', "geobr"), file = 'pacotes.bib')
+```
