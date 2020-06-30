@@ -34,6 +34,8 @@ options(htmltools.dir.version = FALSE)
 
 Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmarkdown2018; @R-rmarkdown] e o modelo `{tufte}` [@R-tufte].
 
+As etapas envolvidas são: obter e tratar as bases de dados, unir bases, ...
+
 ## Pacotes necessários
 
 ```{r}
@@ -49,11 +51,13 @@ library(readr)
 
 - __Dados de Saneamento: __ A Companhia Ambiental do Estado de São Paulo (CETESB)^[https://cetesb.sp.gov.br/] publica todos os anos o "Relatório de Qualidade das Águas Interiores do Estado de São Paulo". Desde o relatório referente ao ano de 2016, é publicado o __Apêndice C__, que contém __dados de saneamento por município__ do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).
 
-- __Dados de municípios que fazem parte da MMP:__ ...
+- __Municípios que fazem parte da MMP:__ ... A Macrometrópole Paulista tem duas delimitações: a delimitação realizada pela extinta Empresa Paulista de Planejamento Metropolitano (EMPLASA)^[https://emplasa.sp.gov.br/MMP], que abrange 174 municípios; e a delimitação pelo Departamento de Águas e Energia Elétrica (DAEE)^[Ver: Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/], que abrange 180 municípios.
 
 - __Dados shapefile dos municípios:__ Foi utilizado o pacote `{geobr}` [@R-geobr], que possibilita acessar dados espaciais oficiais do Brasil.
 
-## Abrir e arrumar as bases
+## Abrir e arrumar as bases brutas
+
+### Dados de Saneamento
 
 - Fazer o download do PDF e converter em CSV:
 
@@ -106,7 +110,7 @@ apendice_c_filtrado <- apendice_c_2018 %>%
   filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) 
 ```
 
-- Verificar o tipo de dados nas colunas:
+- Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde aos 645 municípios do estado de SP. Verificar o tipo de dados nas colunas:
 
 ```{r}
 glimpse(apendice_c_filtrado)
@@ -132,6 +136,22 @@ apendice_c <- apendice_c_filtrado %>%
 ```{r}
 glimpse(apendice_c)
 ```
+
+- Agora a base está pronta para uso :)
+
+### Dados shapefile dos município
+
+```{r message=FALSE, warning=FALSE, results='hide', error=FALSE}
+municipios_sp <- geobr::read_municipality("SP", 2018)
+```
+
+### Municípios que fazem parte da MMP
+
+...
+
+## Unir as 3 bases em uma única base!
+
+...
 
 ## Referências
 

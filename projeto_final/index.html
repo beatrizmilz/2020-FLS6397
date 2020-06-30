@@ -257,6 +257,7 @@ if (window.hljs) {
 <div id="introdução" class="section level2">
 <h2>Introdução</h2>
 <p>Esse projeto final foi realizado com R <span class="citation">(R Core Team 2019)</span>, o pacote <code>{rmarkdown}</code> <span class="citation">(Xie, Allaire, and Grolemund 2018; Allaire et al. 2020)</span> e o modelo <code>{tufte}</code> <span class="citation">(Xie and Allaire 2020)</span>.</p>
+<p>As etapas envolvidas são: obter e tratar as bases de dados, unir bases, …</p>
 </div>
 <div id="pacotes-necessários" class="section level2">
 <h2>Pacotes necessários</h2>
@@ -270,12 +271,14 @@ library(readr)</code></pre>
 <h2>Dados utilizados</h2>
 <ul>
 <li><p><strong>Dados de Saneamento: </strong> A Companhia Ambiental do Estado de São Paulo (CETESB)<label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> <a href="https://cetesb.sp.gov.br/" class="uri">https://cetesb.sp.gov.br/</a></span> publica todos os anos o “Relatório de Qualidade das Águas Interiores do Estado de São Paulo”. Desde o relatório referente ao ano de 2016, é publicado o <strong>Apêndice C</strong>, que contém <strong>dados de saneamento por município</strong> do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).</p></li>
-<li><p><strong>Dados de municípios que fazem parte da MMP:</strong> …</p></li>
+<li><p><strong>Municípios que fazem parte da MMP:</strong> … A Macrometrópole Paulista tem duas delimitações: a delimitação realizada pela extinta Empresa Paulista de Planejamento Metropolitano (EMPLASA)<label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> <a href="https://emplasa.sp.gov.br/MMP" class="uri">https://emplasa.sp.gov.br/MMP</a></span>, que abrange 174 municípios; e a delimitação pelo Departamento de Águas e Energia Elétrica (DAEE)<label for="tufte-sn-3" class="margin-toggle sidenote-number">3</label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">3</span> Ver: Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - <a href="http://www.daee.sp.gov.br/" class="uri">http://www.daee.sp.gov.br/</a></span>, que abrange 180 municípios.</p></li>
 <li><p><strong>Dados shapefile dos municípios:</strong> Foi utilizado o pacote <code>{geobr}</code> <span class="citation">(Pereira and Goncalves 2020)</span>, que possibilita acessar dados espaciais oficiais do Brasil.</p></li>
 </ul>
 </div>
-<div id="abrir-e-arrumar-as-bases" class="section level2">
-<h2>Abrir e arrumar as bases</h2>
+<div id="abrir-e-arrumar-as-bases-brutas" class="section level2">
+<h2>Abrir e arrumar as bases brutas</h2>
+<div id="dados-de-saneamento" class="section level3">
+<h3>Dados de Saneamento</h3>
 <ul>
 <li>Fazer o download do PDF e converter em CSV:</li>
 </ul>
@@ -318,7 +321,7 @@ library(readr)</code></pre>
   filter_all(any_vars(!is.na(.))) %&gt;% 
   filter(!municipio %in% c(&quot;Estado de São Paulo&quot;, &quot;Município&quot;, NA, &quot;MUNICÍPIO&quot;)) </code></pre>
 <ul>
-<li>Verificar o tipo de dados nas colunas:</li>
+<li>Agora a base tem 645 linhas, o que corresponde aos 645 municípios do estado de SP. Verificar o tipo de dados nas colunas:</li>
 </ul>
 <pre class="r"><code>glimpse(apendice_c_filtrado)</code></pre>
 <pre><code>## Rows: 645
@@ -363,6 +366,22 @@ library(readr)</code></pre>
 ## $ carga_poluidora_remancescente &lt;dbl&gt; 1.377, 136.000, 133.000, 1.659, 26.00...
 ## $ ictem                         &lt;chr&gt; &quot;6,06&quot;, &quot;4,65&quot;, &quot;6,14&quot;, &quot;2,56&quot;, &quot;8,22...
 ## $ corpo_receptor                &lt;chr&gt; &quot;Rio Capivari, Rio Sapucaí-Guaçu e af...</code></pre>
+<ul>
+<li>Agora a base está pronta para uso :)</li>
+</ul>
+</div>
+<div id="dados-shapefile-dos-município" class="section level3">
+<h3>Dados shapefile dos município</h3>
+<pre class="r"><code>municipios_sp &lt;- geobr::read_municipality(&quot;SP&quot;, 2018)</code></pre>
+</div>
+<div id="municípios-que-fazem-parte-da-mmp" class="section level3">
+<h3>Municípios que fazem parte da MMP</h3>
+<p>…</p>
+</div>
+</div>
+<div id="unir-as-3-bases-em-uma-única-base" class="section level2">
+<h2>Unir as 3 bases em uma única base!</h2>
+<p>…</p>
 </div>
 <div id="referências" class="section level2 unnumbered">
 <h2>Referências</h2>
