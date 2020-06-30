@@ -22,8 +22,9 @@ HTML compilado em: `r format(Sys.Date(), format="%d de %B de %Y")`
 
 library(tidyverse) # pacote que inclui diversos pacotes para ciência de dados
 library(readxl) # pacote para ler arquivos excel
-
+library(purrr) # pacote para programação funcional
 library(geobr) # pacote para usar mapas do Brasil
+library(sf) # pacote para mapas
 ```
 
 ## Roteiro
@@ -32,15 +33,16 @@ library(geobr) # pacote para usar mapas do Brasil
 
 __1)__ Instale e abre o pacote geobr do IBGE. Leia as instruções no site de github do pacote e use a função read_municipality() para acessar todos os municípios do estado de São Paulo em 2018.
 
-```{r echo=TRUE, eval = FALSE, message=FALSE, warning=FALSE, cache=TRUE}
-municipios_sp <- geobr::read_municipality("SP",year = 2018)
+```{r message=FALSE, warning=FALSE, results='hide', error=FALSE}
+municipios_sp <- geobr::read_municipality("SP", year = 2018)
 ```
 
 
 __2)__ Use a funcionalidade da família de map para aplicar a função read_municipality para cinco estados em uma linha única de código: SP, RJ, MT, RS e RN (todos para o ano de 2018).
 
-```{r}
-# Fazer depois de fazer a aula sobre purrr !!!
+```{r,  message=FALSE, warning=FALSE, results='hide', error=FALSE}
+cinco_estados <-  purrr::map_df(c("SP", "RJ", "MT", "RS", "RN"),
+                                geobr::read_municipality, year = 2018)
 ```
 
 
@@ -71,8 +73,8 @@ __5)__ Queremos mapear dados da população por município. Identifique o chave 
 # A chave - coluna em comum - é relacionada ao código do município
 
 # Essas duas variáveis precisam ser do mesmo tipo.
-typeof(municipios_sp$code_muni)
-typeof(total_populacao_sao_paulo$codigo_do_municipio)
+typeof(municipios_sp$code_muni) # double
+typeof(total_populacao_sao_paulo$codigo_do_municipio) #character
 
 # Não são. Precisa padronizar via mutate :) Aproveito e deixo com o mesmo nome de variável.
 
@@ -90,25 +92,65 @@ mapa_sp_populacao <-
 __6)__ Usando o seu banco de dados de Questão 5, calcule a proporção da população urbana na população total em cada município e visualize um mapa bem-formatado dessa taxa por município em 2010. Aplique uma escala de cores desejada.
 
 ```{r}
-mapa_sp_populacao %>% 
-  mutate(pop)
+mapa_sp_populacao %>%
+  mutate(proporcao_pop_urbana = round(100 * total_da_populacao_urbana / total_da_populacao_2010, 2)) %>%
+  ggplot() +
+  geom_sf(aes(fill = proporcao_pop_urbana)) +
+  scale_fill_continuous(type = "viridis") +
+  theme_bw() +
+  labs(title = "Proporção de população urbana nos municípios do Estado de São Paulo (2010)",
+       caption = "Dados shapefile do pacote {geobr}. Ano de referência: 2018. \n Dados de população do IBGE para o ano de 2010 (ibge.gov.br).",
+       fill = " Proporção \n da população \n urbana (%)")
 ```
 
 
 
 __7)__ Abre o shapeifle no arquivo MCMV_new.shp, que documenta a localização dos projetos de Minha Casa Minha Vida no Brasil, e o número de Unidades Habitacionais (UH) em cada projeto.
 
+```{r}
+mcmv <- st_read("dados/MCMV_new/MCMV_new.shp")
+```
+
+
 
 __8)__ Verifique se a projeção (o CRS) dos dois bancos de dados espaciais (municípios e MCMV) são iguais, e, se necessário, padronize eles para um CRS da sua preferência.
 
+```{r}
+ # qual o sistema de referência?
+st_crs(mcmv)
+st_crs(municipios_sp) 
+
+municipios_sp_wgs84 <- municipios_sp %>% st_transform(4326)
+```
 
 __9)__ Realize um spatial join para informar os dados de MCMV por município do estado de São Paulo, usando a localização dos projetos para juntar com os polígonos dos municípios.
+
+```{r}
+municipios_sp_mcmv <- st_join( municipios_sp_wgs84, mcmv)
+
+```
 
 
 __10)__ Visualize um mapa do número de unidades habitacionais (UH) de MCMV por município de São Paulo (por polígono), e adicione uma segunda camada com a localização dos projetos de MCMV (os pontos). Formate o mapa e a escala de cores, e inclua um título.
 
 
-### Estatísticas
+```{r}
+
+mcmv_sp <- mcmv %>% filter(UF == "SP")
+
+  ggplot() +
+  geom_sf(data = municipios_sp_mcmv, aes(fill = UH)) +
+  scale_fill_continuous(type = "viridis") +
+  geom_sf(data = mcmv_sp, alpha = 0.5 , size = 1) + 
+ theme_bw() +
+  labs(title = "Quantidade de unidades habitacionais construídas pelo Minha Casa Minha Vida",
+        subtitle = "nos municípios do Estado de São Paulo.",
+       caption = "Dados shapefile dos municípios de SP do pacote {geobr}. Ano de referência: 2018.",
+       fill = "Número de \nunidades \nhabitacionais")
+```
+
+
+### Estatísticas e Programação funcional
 
 __11)__ Imagine que os nossos dados são apenas uma amostra de todos os projetos de MCMV, e o governo de São Paulo se compremeteu a construir exatamente uma média de 600 unidades habitacionais por município. Avalie com a nossa amostra disponível se eles atingiram este objetivo com um t-test da média.
 
@@ -117,6 +159,7 @@ __12)__ Queremos entender por que alguns municípios recebem mais unidades habit
 
 
 __13)__ Mostre um gráfico dos efeitos marginais da regressão em Questão 12 - o tamanho dos dois coefficientes e os seus intervalos de confiança.
+
 
 
 __14)__ Usando o banco de dados nacional de MCMV, use nest() para gerar um tibble ‘nested’ por estado. No seu tibble de resumo (com uma linha por estado) use a família de map para calcular o número de projetos em cada estado, e o número total de Unidades Habitacionais (UH) em cada estado como novas colunas.
