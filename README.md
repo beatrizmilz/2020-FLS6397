@@ -87,8 +87,8 @@ Resolução de exercícios da disciplina [FLS6397 - Introdução à Análise de 
 
 - [x] [Desafio 4 - Replicabilidade, Sugestões e Trabalho Comunitário](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_4_v1.html) - Entregue. Não irei commitar pois esse exercício é um code review de código de outra pessoa.
 
-- [ ] [Desafio 5 - Análises Avançadas de Tipos de Dados Diversos](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_5_v1.html) - Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_5/desafio_5.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_5/desafio_5.Rmd)
+- [x] [Desafio 5 - Análises Avançadas de Tipos de Dados Diversos](https://jonnyphillips.github.io/Ciencia_de_Dados/Desafios/Desafio_5_v1.html) - Resolução em: [HTML](https://beatrizmilz.github.io/2020-FLS6397/desafio_5/desafio_5.html) ou [RMarkdown](https://beatrizmilz.github.io/2020-FLS6397/desafio_5/desafio_5.Rmd)
 
-## Trabalho final
+## Projeto Final
 
-- Fazer quando completar os tutoriais e desafios!
+- [ ]  Fazer até 24 de julho de 2020!

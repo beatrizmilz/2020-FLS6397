@@ -25,9 +25,13 @@ library(readxl) # pacote para ler arquivos excel
 library(purrr) # pacote para programação funcional
 library(geobr) # pacote para usar mapas do Brasil
 library(sf) # pacote para mapas
-library(broom)
-library(pdftools)
-library(stringr)
+library(broom) # modelos
+library(pdftools) #pacote para ler arquivos pdf
+library(stringr) # pacote para trabalhar com texto
+library(tidytext) # pacote para trabalhar com texto
+library(textstem) # lidar com texto - stemização
+library(wordcloud2) # nuvem de palavras
+library(lexiconPT) # sentimento das palavras
 ```
 
 ## Roteiro
@@ -272,38 +276,108 @@ camara_splited <-
 __17c)__ Em seguida, unnest() os dados para que cada fala de cada deputado é uma linha separado no tibble.
 
 ```{r}
-camara_splited %>% unnest(cols = c(separado)) %>% select(-value)
+camara_unested <- camara_splited %>% unnest(cols = c(separado)) %>% select(-value)
 ```
 
 
 __17d)__ Use separate para dividir a fala de cada deputado em duas colunas: O nome do Deputado, e o Discurso, usando o seguinte string como divisor: "\\) - "
 
+```{r}
+discurso_1 <- camara_unested %>% separate(separado, into = c("nome", "discurso"), sep = "\\) - ") %>% 
+  filter(row_number() != 1)
+```
+
 
 __17e)__ O resultado deve conter umas linhas em que a coluna ‘Deputado’ não é uma pessoa, mas começa com “Sessão”. Use filter para tirar essas linhas que começam com “Sessão” na coluna de ‘Deputado’.
 
+Já fiz em códigos anteriores.
 
 __17f)__ Ainda, o nome do deputado fica desarrumado por causa de conteúdo em parenteses. Para identificar os deputados únicos, use separate para dividir a coluna do nome de Deputado em o nome e o conteúdo nos parenteses (que não importa para nos), usando o seguinte string como divisor: " \\(".
+
+```{r}
+discurso_deputades <- discurso_1 %>% separate(nome, into = c("nome", "partido"), sep = " \\(") %>% 
+  mutate(deputade = case_when(
+    nome == " PRESIDENTE" ~ "Presidente Marcos Pereira",
+    TRUE ~ nome),
+    nome = str_to_title(deputade)) %>% 
+  select(-deputade, -partido)
+```
 
 
 __17g)__ Tire as colunas desnecessárias para que temos apenas as duas colunas: Nome do Deputado, e Discurso.
 
+Já fiz em códigos anteriores.
 
 __18)__ Agora, com o tibble de Questão 17, vamos desaggregar e padronizar os discursos:
 
 
 __18a)__ ‘Tokenizar’ os discursos dos deputados em palavras únicas para que o seu tibble contém uma linha por palavra.
 
+```{r}
+token <- discurso_deputades %>% unnest_tokens(palavra, discurso, strip_numeric=TRUE)
+```
+
 
 __18b)__ Tire os stopwords de português. Se quiser, pode incluir mais stopwords que você acha não relevante para a análise.
+
+```{r}
+stopwords <- get_stopwords(language="pt") %>%
+  rename(palavra=word) %>% add_row(palavra = c("é", "nº", "sr"), lexicon="pessoal")
+
+token_sem_stopwords <- token %>% anti_join(stopwords, by="palavra")
+
+token_sem_stopwords %>% group_by(palavra) %>% count() %>% arrange(-n)
+
+```
 
 
 __18c)__ Transforme as palavras em suas raízes, os ‘stems’.
 
+```{r}
+stem_deputades <-
+  token_sem_stopwords %>%  mutate(stem = stem_words(palavra, language = "pt"))
+```
+
 
 __19)__ Gere um ‘wordcloud’ dos stems das palavras usados pelos Deputados.
+
+```{r}
+stem_deputades %>% group_by(stem) %>% count(name = "freq") %>% # stems
+wordcloud2()
+
+```
 
 
 __20)__ Execute uma análise de sentimento para identificar no documento inteiro qual Deputado que usa as palavras mais otimistas e qual Deputado usa as palavras mais pessimistas.
 
+```{r}
+sentimento <- oplexicon_v3.0 %>% select(term, polarity) %>%   rename(palavra=term)
+
+polarity <- token_sem_stopwords  %>% inner_join(sentimento, by="palavra") # usando o inner join, palavras que nao tem polarity no dicionário são ignoradas
+
+soma_polarity <- polarity %>% group_by(nome) %>% summarise(total_polaridade = sum(polarity, na.rm = TRUE)) %>% arrange(total_polaridade)
+
+
+soma_polarity %>% slice(1, n()) 
+```
+
+
+
 
 __21)__ No seu tibble de palavras e Deputados, gere um indicador binário da identidade do Deputado falando - se seja o Presidente da Câmara, ou qualquer outro Deputado (tratando todos juntos). Identifique as cinco palavras mais distintas de cada group (Presidente vs. outros).
+
+```{r}
+token_sem_stopwords %>% 
+  mutate(presidente = case_when(
+    nome == "Presidente Marcos Pereira" ~ TRUE,
+    TRUE ~ FALSE)
+    ) %>% 
+  group_by(presidente, palavra) %>% 
+  tally() %>% 
+  bind_tf_idf(palavra, presidente, n) %>% 
+  ungroup() %>% 
+   group_by(presidente) %>%
+  top_n(5, tf_idf)
+  
+```
+
