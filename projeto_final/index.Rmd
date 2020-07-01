@@ -32,28 +32,47 @@ options(htmltools.dir.version = FALSE)
 
 ## Introdução
 
+Este arquivo corresponde ao projeto final da disciplina ["FLS6397 - Introdução à Análise de Dados, Programação e Visualização para as Ciências Sociais"](https://jonnyphillips.github.io/Ciencia_de_Dados/). As instruções para a realização do projeto estão disponíveis na [página da disciplina](https://jonnyphillips.github.io/Ciencia_de_Dados/projeto.html).
+
 Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmarkdown2018; @R-rmarkdown] e o modelo `{tufte}` [@R-tufte].
 
+__Objetivos:__ Explorar os dados de coleta e tratamento de esgoto nos municípios do Estado de São Paulo, para os municípios das Unidades de Gerenciamento de Recursos Hídricos (__UGRHI__) que fazem totalmente ou parcialmente parte do território da Macrometrópole Paulista (__MMP__) (considerando a delimitação do DAEE^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/]).
+
+
 As etapas envolvidas são: obter e tratar as bases de dados, unir bases, ...
-
-## Pacotes necessários
-
-```{r}
-library(tidyverse)
-library(geobr)
-# install.packages("pdftables")
-library(pdftables)
-library(readr)
-```
 
 
 ## Dados utilizados
 
 - __Dados de Saneamento: __ A Companhia Ambiental do Estado de São Paulo (CETESB)^[https://cetesb.sp.gov.br/] publica todos os anos o "Relatório de Qualidade das Águas Interiores do Estado de São Paulo". Desde o relatório referente ao ano de 2016, é publicado o __Apêndice C__, que contém __dados de saneamento por município__ do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).
 
-- __Municípios que fazem parte da MMP:__ ... A Macrometrópole Paulista tem duas delimitações: a delimitação realizada pela extinta Empresa Paulista de Planejamento Metropolitano (EMPLASA)^[https://emplasa.sp.gov.br/MMP], que abrange 174 municípios; e a delimitação pelo Departamento de Águas e Energia Elétrica (DAEE)^[Ver: Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/], que abrange 180 municípios.
+```{r eval=FALSE, include=FALSE}
+# - __Municípios que fazem parte da MMP:__ ... A Macrometrópole Paulista tem duas delimitações: a delimitação realizada pela extinta Empresa Paulista de Planejamento Metropolitano (EMPLASA)^[https://emplasa.sp.gov.br/MMP], que abrange 174 municípios; e a delimitação pelo Departamento de Águas e Energia Elétrica (DAEE)^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/], que abrange 180 municípios.
+```
+
 
 - __Dados shapefile dos municípios:__ Foi utilizado o pacote `{geobr}` [@R-geobr], que possibilita acessar dados espaciais oficiais do Brasil.
+
+## Pacotes necessários
+
+```{r}
+#library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+library(geobr)
+# install.packages("pdftables")
+library(pdftables)
+library(readr)
+library(stringr)
+library(abjutils)
+library(ggspatial)
+library(tibble)
+library(knitr)
+```
+
+Referências dos pacotes utilizados: `{abjutils}` [@R-abjutils], `{dplyr}` [@R-dplyr], `{geobr}` [@R-geobr], `{ggplot2}` [@R-ggplot2; @ggplot22016], `{ggspatial}` [@R-ggspatial], `{knitr}` [@R-knitr; @knitr2015], `{magrittr}` [@R-magrittr], `{pdftables}` [@R-pdftables], `{readr}` [@R-readr], `{rmarkdown}` [@R-rmarkdown; @rmarkdown2018], `{stringr}` [@R-stringr], `{tibble}` [@R-tibble], `{tufte}` [@R-tufte].
+
 
 ## Abrir e arrumar as bases brutas
 
@@ -64,16 +83,24 @@ library(readr)
 ```{r}
 url <- "https://cetesb.sp.gov.br/aguas-interiores/wp-content/uploads/sites/12/2019/10/Ap%C3%AAndice-C_Dados-de-Saneamento-por-Munic%C3%ADpio.pdf" # link do apêndice C para o ano de 2018
 
-# download.file(url, destfile = "dados/apendice_c_2018.pdf", method = "curl") # Faz o download do PDF 
+# Comentei os passos de download e conversão do arquivo PDF, pois após a primeira vez, não é preciso repetir essa operação para compilar o arquivo, e deixa o código mais lento.
 
-#pdftables::convert_pdf("dados/apendice_c_2018.pdf", output_file = "dados/apendice_c_2018.csv", api_key = "xhtlrqbqfaf7")
+# Fazer o download do arquivo PDF 
+# download.file(url,
+#               destfile = "dados/apendice_c_2018.pdf",
+#               method = "curl") 
+
+# Converter o arquivo PDF em CSV. Utilizei a API que obtive no site, mas para compilar, omiti a API key.
+# pdftables::convert_pdf("dados/apendice_c_2018.pdf",
+#                        output_file = "dados/apendice_c_2018.csv",
+#                        api_key = "...")
 ```
 
-- Abrir a base:
+- A tabela convertida em `.csv` pode ser acessada [neste link](https://beatrizmilz.github.io/2020-FLS6397/projeto_final/dados/apendice_c_2018.csv). O próximo passo é abrir a base:
 ```{r}
 
 apendice_c_2018 <-
-  read_csv(
+  readr::read_csv(
     "dados/apendice_c_2018.csv",
       col_names = c(
     "ugrhi",
@@ -88,13 +115,13 @@ apendice_c_2018 <-
     "ictem",
     "corpo_receptor"
   ),
-    locale = locale(encoding = "ISO-8859-1"),
+    locale = readr::locale(encoding = "ISO-8859-1"),
     skip = 5
   )
 
 ```
 
-- A base deve conter 645 linhas, referente ao número de municípios no estado de São Paulo:
+- A base deve conter 645 linhas, referente ao número de municípios no estado de São Paulo^[https://www.al.sp.gov.br/documentacao/municipios-paulistas/]:
 
 ```{r}
 nrow(apendice_c_2018)
@@ -106,38 +133,43 @@ nrow(apendice_c_2018)
 
 ```{r}
 apendice_c_filtrado <- apendice_c_2018 %>% 
-  filter_all(any_vars(!is.na(.))) %>% 
-  filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) 
+  dplyr::filter_all(dplyr::any_vars(!is.na(.))) %>% 
+  dplyr::filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) 
 ```
 
 - Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde aos 645 municípios do estado de SP. Verificar o tipo de dados nas colunas:
 
 ```{r}
-glimpse(apendice_c_filtrado)
+tibble::glimpse(apendice_c_filtrado)
 ```
 
 - Algumas colunas são de dados numéricos mas que estão como texto, portanto deve ser convertido:
 
 ```{r}
+
+# Esse código está causando erro
+
 apendice_c <- apendice_c_filtrado %>%
-  mutate(
-    pop_urbana = as.double(pop_urbana),
-    atendimento_coleta_porc = as.double(atendimento_coleta_porc),
-    atendimento_tratamento_porc = as.double(atendimento_tratamento_porc),
-    carga_poluidora_potencial = as.double(carga_poluidora_potencial),
-    carga_poluidora_remancescente = as.double(carga_poluidora_remancescente),
-      # ictem = as.double(ictem), # Verificar isso
-  )
+  dplyr::mutate(
+    pop_urbana_d = as.double(pop_urbana) ,
+    atendimento_coleta_porc_d = as.double(atendimento_coleta_porc),
+   atendimento_tratamento_porc_d = as.double(atendimento_tratamento_porc),
+   eficiencia_d = as.double(eficiencia),
+   # carga_poluidora_potencial_d = as.numeric(carga_poluidora_potencial), #erro - arrumar
+    # carga_poluidora_remancescente_d = as.double(carga_poluidora_remancescente)#, # erro - arrumar
+    #  ictem = as.double(ictem), # erro - arrumar
+  ) 
+
 ```
 
 
 - Verificar novamente o tipo de dados nas colunas:
 
 ```{r}
-glimpse(apendice_c)
+tibble::glimpse(apendice_c)
 ```
 
-- Agora a base está pronta para uso :)
+- Agora a base está pronta para uso.
 
 ### Dados shapefile dos município
 
@@ -145,13 +177,139 @@ glimpse(apendice_c)
 municipios_sp <- geobr::read_municipality("SP", 2018)
 ```
 
-### Municípios que fazem parte da MMP
+### Lista de UGRHIS
 
-...
+- Eu criei uma tibble com o número e nome das UGRHIs que contém municípios que fazem parte da MMP:
 
-## Unir as 3 bases em uma única base!
+```{r}
+ugrhis <- tibble::tibble(
+  n_ugrhi = c(2, 3, 5, 6, 7, 9, 10, 11),
+  nome_ugrhi = c(
+    " Paraíba do Sul",
+    " Litoral Norte",
+    " Piracicaba/Capivari/Jundiaí",
+    " Alto Tietê",
+    " Baixada Santista",
+    " Mogi-Guaçu",
+    " Tietê/Sorocaba",
+    " Ribeira de Iguape/Litoral Sul"
+  )
+)
+  
 
-...
+
+ugrhis %>% knitr::kable()
+```
+
+## Unir as bases !
+
+- A base da CETESB não possui o código de município do IBGE (o ideal para fazer o Join). Neste caso, podemos usar o nome do município, porém é preciso padronizar os nomes em relação à maiúsculas/minúsculas, acentos, presença de traços, entre outros. A maior diferença encontrada foi na grafia do nome do município "São Luiz do Paraitinga": segundo o site da Assembléia Legislativa do Estado de São Paulo, e o site do município, Luiz é escrito com Z, porém a base da CETESB utiliza a forma incorreta: "São Luís do Paraitinga". Essas inconsistências foram corrigidas com código abaixo:
+
+```{r}
+
+municipios_sp_limpo <-
+  municipios_sp %>% dplyr::mutate(
+    nome_muni = stringr::str_to_lower(name_muni),
+    nome_muni = stringr::str_replace_all(nome_muni, "-", " "),
+    nome_muni = abjutils::rm_accent(nome_muni)
+  )
+
+apendice_c_limpo <- apendice_c %>% dplyr::mutate(
+  nome_muni =  dplyr::case_when(
+    municipio == "São Luís do Paraitinga" ~
+      "São Luiz do Paraitinga",
+    TRUE ~ municipio
+  ),
+  nome_muni = stringr::str_to_lower(nome_muni),
+  nome_muni = stringr::str_replace_all(nome_muni, "-", " "),
+  nome_muni = abjutils::rm_accent(nome_muni),
+  
+)
+
+```
+
+- Após arrumar a base, podemos unir com o Join:
+
+```{r}
+apendice_c_geo <- dplyr::full_join(municipios_sp_limpo, apendice_c_limpo)
+
+apendice_c_geo %>% nrow() # Confirmando se a nova base tem o número de municípios do estado.
+```
+
+- Ao unir as bases, temos colunas duplicadas ou desnecessárias, então é interessante removê-las. Além disso, filtro apenas os municípios que estão nas UGRHIs listadas anteriormente.
+
+```{r}
+saneamento <- apendice_c_geo %>%
+  dplyr::select(-nome_muni, -municipio, -code_state) %>% 
+  dplyr::filter(ugrhi %in% ugrhis$n_ugrhi)
+```
+
+
+## Explorando os dados
+
+- Quais são os municípios com menor porcentagem de atendimento de coleta de esgoto?
+
+```{r}
+# saneamento %>% 
+#   arrange(atendimento_coleta_porc) %>%
+#   select(name_muni, ugrhi, consessao, atendimento_coleta_porc) 
+```
+
+
+```{r}
+# teste <- saneamento %>% arrange(-carga_poluidora_remancescente) # tá errado
+```
+
+
+## Visualizando os dados
+
+```{r}
+saneamento %>% 
+  ggplot()+
+  geom_sf(data = apendice_c_geo, alpha = .9, color = NA) +
+  geom_sf(aes(fill = atendimento_coleta_porc_d)) +
+  scale_fill_viridis_c(direction = -1)+
+    theme_bw() +
+  labs(fill = "Porcentagem de \natendimento de \ncoleta de esgoto")+
+   annotation_scale(location = "br", width_hint = 0.30) +
+      annotation_north_arrow(
+        location = "br",
+        which_north = "true",
+        height = unit(1, "cm"),
+        width = unit(1, "cm"),
+        pad_x = unit(0.5, "in"),
+        pad_y = unit(0.3, "in"),
+        style = north_arrow_fancy_orienteering
+      ) +
+
+      theme(
+        panel.grid.major = element_line(
+          color = gray(0.9),
+          linetype = "dashed",
+          size = 0.1
+           ),
+        panel.background = element_rect(fill = "white")
+      ) +
+theme(axis.text.y = element_text(angle = 90, hjust = 0.5, size = 8),
+      axis.text.x = element_text( size = 8),
+      axis.title.y = element_text(size = rel(0.8)),
+      axis.title.x = element_text(size = rel(0.8))
+      )
+
+```
+
+
+
+
+## Recomendações para a base da CETESB
+
+- Adicionar uma explicação do que significa os dados de cada coluna.
+
+- Disponibilizar o CSV. Não disponibilizar PDFs digitalizados (como o para o ano de 2016).
+
+- Seria útil adicionar, para os próximos relatórios, a coluna de código IBGE do município. 
+
+- Verificar a grafia do nome dos municípios (está inconsistente com a lista de municípios da Assembléia Legislativa do Estado de São Paulo^[https://www.al.sp.gov.br/documentacao/municipios-paulistas/]): São Luiz do Paraitinga, Biritiba Mirim, Itaoca.
 
 ## Referências
 
