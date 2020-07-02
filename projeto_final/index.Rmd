@@ -39,9 +39,6 @@ Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmar
 __Objetivos:__ Explorar os dados de coleta e tratamento de esgoto nos municípios do Estado de São Paulo, para os municípios das Unidades de Gerenciamento de Recursos Hídricos (__UGRHI__) que fazem totalmente ou parcialmente parte do território da Macrometrópole Paulista (__MMP__) (considerando a delimitação do DAEE^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/]).
 
 
-As etapas envolvidas são: obter e tratar as bases de dados, unir bases, ...
-
-
 ## Dados utilizados
 
 - __Dados de Saneamento: __ A Companhia Ambiental do Estado de São Paulo (CETESB)^[https://cetesb.sp.gov.br/] publica todos os anos o "Relatório de Qualidade das Águas Interiores do Estado de São Paulo". Desde o relatório referente ao ano de 2016, é publicado o __Apêndice C__, que contém __dados de saneamento por município__ do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).
@@ -78,7 +75,7 @@ Referências dos pacotes utilizados: `{abjutils}` [@R-abjutils], `{dplyr}` [@R-d
 
 ### Dados de Saneamento
 
-- Fazer o download do PDF e converter em CSV:
+- Fazer o download do arquivo PDF  referente ao Apêndice C e converter em CSV:
 
 ```{r}
 url <- "https://cetesb.sp.gov.br/aguas-interiores/wp-content/uploads/sites/12/2019/10/Ap%C3%AAndice-C_Dados-de-Saneamento-por-Munic%C3%ADpio.pdf" # link do apêndice C para o ano de 2018
@@ -97,12 +94,13 @@ url <- "https://cetesb.sp.gov.br/aguas-interiores/wp-content/uploads/sites/12/20
 ```
 
 - A tabela convertida em `.csv` pode ser acessada [neste link](https://beatrizmilz.github.io/2020-FLS6397/projeto_final/dados/apendice_c_2018.csv). O próximo passo é abrir a base:
+
 ```{r}
 
 apendice_c_2018 <-
   readr::read_csv(
     "dados/apendice_c_2018.csv",
-      col_names = c(
+      col_names = c( # define o nome das colunas, pois ao converter para pdf fica desconfigurado (em 2 linhas)
     "ugrhi",
     "municipio",
     "consessao",
@@ -115,8 +113,8 @@ apendice_c_2018 <-
     "ictem",
     "corpo_receptor"
   ),
-    locale = readr::locale(encoding = "ISO-8859-1"),
-    skip = 5
+    locale = readr::locale(encoding = "ISO-8859-1"), # encoding dos dados
+    skip = 5 # Quantas linhas para pular no CSV antes de começar a ler os dados.
   )
 
 ```
@@ -133,8 +131,8 @@ nrow(apendice_c_2018)
 
 ```{r}
 apendice_c_filtrado <- apendice_c_2018 %>% 
-  dplyr::filter_all(dplyr::any_vars(!is.na(.))) %>% 
-  dplyr::filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) 
+  dplyr::filter_all(dplyr::any_vars(!is.na(.))) %>%  # Retira as linhas que apenas contém NA
+  dplyr::filter(!municipio %in% c("Estado de São Paulo", "Município", NA, "MUNICÍPIO")) # Filtrar linhas que não contém municípios
 ```
 
 - Agora a base tem `r nrow(apendice_c_filtrado)` linhas, o que corresponde aos 645 municípios do estado de SP. Verificar o tipo de dados nas colunas:
@@ -143,7 +141,7 @@ apendice_c_filtrado <- apendice_c_2018 %>%
 tibble::glimpse(apendice_c_filtrado)
 ```
 
-- Algumas colunas são de dados numéricos mas que estão como texto, portanto deve ser convertido:
+- Algumas colunas são de dados numéricos mas que estão como texto, portanto devem ser convertidas:
 
 ```{r}
 
@@ -151,10 +149,10 @@ tibble::glimpse(apendice_c_filtrado)
 
 apendice_c <- apendice_c_filtrado %>%
   dplyr::mutate(
-    pop_urbana_d = as.double(pop_urbana) ,
-    atendimento_coleta_porc_d = as.double(atendimento_coleta_porc),
-   atendimento_tratamento_porc_d = as.double(atendimento_tratamento_porc),
-   eficiencia_d = as.double(eficiencia),
+    pop_urbana = as.double(pop_urbana) ,
+    atendimento_coleta_porc = as.double(atendimento_coleta_porc),
+   atendimento_tratamento_porc = as.double(atendimento_tratamento_porc),
+   eficiencia = as.double(eficiencia),
    # carga_poluidora_potencial_d = as.numeric(carga_poluidora_potencial), #erro - arrumar
     # carga_poluidora_remancescente_d = as.double(carga_poluidora_remancescente)#, # erro - arrumar
     #  ictem = as.double(ictem), # erro - arrumar
