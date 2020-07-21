@@ -34,26 +34,20 @@ options(htmltools.dir.version = FALSE)
 
 Este arquivo corresponde ao projeto final da disciplina ["FLS6397 - Introdução à Análise de Dados, Programação e Visualização para as Ciências Sociais"](https://jonnyphillips.github.io/Ciencia_de_Dados/). As instruções para a realização do projeto estão disponíveis na [página da disciplina](https://jonnyphillips.github.io/Ciencia_de_Dados/projeto.html).
 
-Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmarkdown2018; @R-rmarkdown] e o modelo `{tufte}` [@R-tufte].
+Esse projeto final foi realizado com R [@R-base], o pacote `{rmarkdown}` [ @rmarkdown2018; @R-rmarkdown] e o template do pacote `{tufte}` [@R-tufte].
 
-__Objetivos:__ Explorar os dados de coleta e tratamento de esgoto nos municípios do Estado de São Paulo, para os municípios das Unidades de Gerenciamento de Recursos Hídricos (__UGRHI__) que fazem totalmente ou parcialmente parte do território da Macrometrópole Paulista (__MMP__) (considerando a delimitação do DAEE^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/]).
+__Objetivos:__ Explorar os dados de coleta e tratamento de esgoto para os municípios das seguintes Unidades de Gerenciamento de Recursos Hídricos (__UGRHI__): Paraíba do Sul, Litoral Norte, Piracicaba/Capivari/Jundiaí, Alto Tietê,  Baixada Santista e Tietê/Sorocaba. Essas UGRHIs foram escolhidas por estarem totalmente ou marjoritariamente no território da Macrometrópole Paulista (__MMP__) (considerando a delimitação do DAEE^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/]).
 
 
 ## Dados utilizados
 
 - __Dados de Saneamento: __ A Companhia Ambiental do Estado de São Paulo (CETESB)^[https://cetesb.sp.gov.br/] publica todos os anos o "Relatório de Qualidade das Águas Interiores do Estado de São Paulo". Desde o relatório referente ao ano de 2016, é publicado o __Apêndice C__, que contém __dados de saneamento por município__ do Estado de São Paulo. Os arquivos são disponibilizados em arquivo PDF, e especificamente para o ano de 2016 é um arquivo PDF que não possibilita copiar as informações (como uma imagem, por exemplo).
 
-```{r eval=FALSE, include=FALSE}
-# - __Municípios que fazem parte da MMP:__ ... A Macrometrópole Paulista tem duas delimitações: a delimitação realizada pela extinta Empresa Paulista de Planejamento Metropolitano (EMPLASA)^[https://emplasa.sp.gov.br/MMP], que abrange 174 municípios; e a delimitação pelo Departamento de Águas e Energia Elétrica (DAEE)^[Plano Diretor de Aproveitamento dos Recursos Hídricos para a Macrometrópole Paulista - http://www.daee.sp.gov.br/], que abrange 180 municípios.
-```
-
-
 - __Dados shapefile dos municípios:__ Foi utilizado o pacote `{geobr}` [@R-geobr], que possibilita acessar dados espaciais oficiais do Brasil.
 
 ## Pacotes necessários
 
 ```{r}
-#library(tidyverse)
 library(ggplot2)
 library(dplyr)
 library(magrittr)
@@ -66,9 +60,11 @@ library(abjutils)
 library(ggspatial)
 library(tibble)
 library(knitr)
+library(sf)
+library(patchwork)
 ```
 
-Referências dos pacotes utilizados: `{abjutils}` [@R-abjutils], `{dplyr}` [@R-dplyr], `{geobr}` [@R-geobr], `{ggplot2}` [@R-ggplot2; @ggplot22016], `{ggspatial}` [@R-ggspatial], `{knitr}` [@R-knitr; @knitr2015], `{magrittr}` [@R-magrittr], `{pdftables}` [@R-pdftables], `{readr}` [@R-readr], `{rmarkdown}` [@R-rmarkdown; @rmarkdown2018], `{stringr}` [@R-stringr], `{tibble}` [@R-tibble], `{tufte}` [@R-tufte].
+Referências dos pacotes utilizados: `{abjutils}` [@R-abjutils], `{dplyr}` [@R-dplyr], `{geobr}` [@R-geobr], `{ggplot2}` [@R-ggplot2; @ggplot22016], `{ggspatial}` [@R-ggspatial], `{knitr}` [@R-knitr; @knitr2015], `{magrittr}` [@R-magrittr], `{patchwork}` [@R-patchwork], `{pdftables}` [@R-pdftables], `{readr}` [@R-readr], `{rmarkdown}` [@R-rmarkdown; @rmarkdown2018], `{sf}` [@R-sf; @sf2018],  `{stringr}` [@R-stringr], `{tibble}` [@R-tibble], `{tufte}` [@R-tufte].
 
 
 ## Abrir e arrumar as bases brutas
@@ -122,7 +118,7 @@ apendice_c_2018 <-
 - A base deve conter 645 linhas, referente ao número de municípios no estado de São Paulo^[https://www.al.sp.gov.br/documentacao/municipios-paulistas/]:
 
 ```{r}
-nrow(apendice_c_2018)
+nrow(apendice_c_2018) # consulta quantas linhas tem na base
 ```
 
 
@@ -144,20 +140,20 @@ tibble::glimpse(apendice_c_filtrado)
 - Algumas colunas são de dados numéricos mas que estão como texto, portanto devem ser convertidas:
 
 ```{r}
-
-# Esse código está causando erro
-
 apendice_c <- apendice_c_filtrado %>%
   dplyr::mutate(
     pop_urbana = as.double(pop_urbana) ,
     atendimento_coleta_porc = as.double(atendimento_coleta_porc),
-   atendimento_tratamento_porc = as.double(atendimento_tratamento_porc),
-   eficiencia = as.double(eficiencia),
-   # carga_poluidora_potencial_d = as.numeric(carga_poluidora_potencial), #erro - arrumar
-    # carga_poluidora_remancescente_d = as.double(carga_poluidora_remancescente)#, # erro - arrumar
-    #  ictem = as.double(ictem), # erro - arrumar
-  ) 
-
+    atendimento_tratamento_porc = as.double(atendimento_tratamento_porc),
+    eficiencia = as.double(eficiencia),
+    
+    # As conversões abaixo tem uma etapa a mais, devido à padronização diferente utilizada com o ponto e a vírgula para representar as casas decimais:
+    carga_poluidora_potencial =  stringr::str_replace_all(carga_poluidora_potencial, "\\.", "") %>% as.double(),
+    
+    carga_poluidora_remancescente =  stringr::str_replace_all(carga_poluidora_remancescente, "\\.", "") %>% as.double(),
+    ictem =  stringr::str_replace_all(ictem, ",", "\\.") %>% as.double()
+    
+  )
 ```
 
 
@@ -177,20 +173,24 @@ municipios_sp <- geobr::read_municipality("SP", 2018)
 
 ### Lista de UGRHIS
 
-- Eu criei uma tibble com o número e nome das UGRHIs que contém municípios que fazem parte da MMP:
+- Eu criei uma tibble com o número e nome das UGRHIs que farão parte da análise:
 
 ```{r}
 ugrhis <- tibble::tibble(
-  n_ugrhi = c(2, 3, 5, 6, 7, 9, 10, 11),
+  ugrhi = c("2", 
+            "3", 
+            "5",
+            "6",
+            "7",
+            "10"
+            ),
   nome_ugrhi = c(
     " Paraíba do Sul",
-    " Litoral Norte",
+   " Litoral Norte",
     " Piracicaba/Capivari/Jundiaí",
     " Alto Tietê",
     " Baixada Santista",
-    " Mogi-Guaçu",
-    " Tietê/Sorocaba",
-    " Ribeira de Iguape/Litoral Sul"
+    " Tietê/Sorocaba"
   )
 )
   
@@ -229,7 +229,7 @@ apendice_c_limpo <- apendice_c %>% dplyr::mutate(
 - Após arrumar a base, podemos unir com o Join:
 
 ```{r}
-apendice_c_geo <- dplyr::full_join(municipios_sp_limpo, apendice_c_limpo)
+apendice_c_geo <- dplyr::full_join(municipios_sp_limpo, apendice_c_limpo) %>% dplyr::left_join(ugrhis)
 
 apendice_c_geo %>% nrow() # Confirmando se a nova base tem o número de municípios do estado.
 ```
@@ -239,79 +239,179 @@ apendice_c_geo %>% nrow() # Confirmando se a nova base tem o número de municíp
 ```{r}
 saneamento <- apendice_c_geo %>%
   dplyr::select(-nome_muni, -municipio, -code_state) %>% 
-  dplyr::filter(ugrhi %in% ugrhis$n_ugrhi)
+  dplyr::filter(ugrhi %in% ugrhis$ugrhi) %>% 
+  mutate(porc_real_trat = atendimento_tratamento_porc * atendimento_coleta_porc / 100) # calcula o número real de porcentagem de tratamento de esgoto.
 ```
 
 
 ## Explorando os dados
 
-- Quais são os municípios com menor porcentagem de atendimento de coleta de esgoto?
+- Dentre os municípios que fazem parte da análise, quais são os municípios com menor porcentagem de atendimento de coleta de esgoto?
 
 ```{r}
-# saneamento %>% 
-#   arrange(atendimento_coleta_porc) %>%
-#   select(name_muni, ugrhi, consessao, atendimento_coleta_porc) 
+saneamento %>%
+  arrange(atendimento_coleta_porc) %>%
+  st_drop_geometry() %>% 
+  select(name_muni, nome_ugrhi, consessao, atendimento_coleta_porc) %>%
+  DT::datatable(colnames = c("Município",
+                             "UGRHI",
+                             "Consessão",
+                             "Atendimento de coleta de esgoto (%)"),
+                caption = "Tabela: Porcentagem de atendimento de coleta de esgoto, segundo o Município, no ano de 2018, segundo a CETESB (2019).")
 ```
 
-
-```{r}
-# teste <- saneamento %>% arrange(-carga_poluidora_remancescente) # tá errado
-```
 
 
 ## Visualizando os dados
 
-```{r}
-saneamento %>% 
-  ggplot()+
-  geom_sf(data = apendice_c_geo, alpha = .9, color = NA) +
-  geom_sf(aes(fill = atendimento_coleta_porc_d)) +
-  scale_fill_viridis_c(direction = -1)+
-    theme_bw() +
-  labs(fill = "Porcentagem de \natendimento de \ncoleta de esgoto")+
-   annotation_scale(location = "br", width_hint = 0.30) +
-      annotation_north_arrow(
-        location = "br",
-        which_north = "true",
-        height = unit(1, "cm"),
-        width = unit(1, "cm"),
-        pad_x = unit(0.5, "in"),
-        pad_y = unit(0.3, "in"),
-        style = north_arrow_fancy_orienteering
-      ) +
 
-      theme(
+```{r}
+# Código que repete nos mapas abaixo, para configurar o estilo
+tema_mapa <- theme_bw() +
+  theme(axis.text.y = element_text(angle = 90, hjust = 0.5, size = 8),
+      axis.text.x = element_text( size = 8),
+      axis.title.y = element_text(size = rel(0.8)),
+      axis.title.x = element_text(size = rel(0.8))
+      ) +
+     theme(
         panel.grid.major = element_line(
           color = gray(0.9),
           linetype = "dashed",
           size = 0.1
            ),
-        panel.background = element_rect(fill = "white")
+        panel.background = element_rect(fill = "white")+
+             annotation_scale(location = "br", width_hint = 0.30) 
+      ) 
+```
+
+
+```{r}
+saneamento %>% 
+  ggplot()+
+  geom_sf(data = apendice_c_geo, alpha = .9, color = NA) +
+  geom_sf(aes(fill = nome_ugrhi)) +
+  labs(fill = "UGRHI", 
+       title = "Municípios que fazem parte da análise, segundo a UGRHI")+
+      annotation_north_arrow(
+        location = "br",
+        which_north = "true",
+        height = unit(1, "cm"),
+        width = unit(1, "cm"),
+        pad_x = unit(0.1, "in"),
+        pad_y = unit(0.1, "in"),
+        style = north_arrow_fancy_orienteering
       ) +
-theme(axis.text.y = element_text(angle = 90, hjust = 0.5, size = 8),
-      axis.text.x = element_text( size = 8),
-      axis.title.y = element_text(size = rel(0.8)),
-      axis.title.x = element_text(size = rel(0.8))
-      )
+  tema_mapa
 
 ```
 
 
+```{r}
+saneamento %>%
+  ggplot() +
+  geom_sf(aes(fill = atendimento_coleta_porc)) +
+  scale_fill_viridis_c(direction = -1) +
+  theme_bw() +
+  labs(fill = "Porcentagem de \natendimento de \ncoleta de esgoto",
+          title = "Porcentagem de atendimento de coleta de esgoto, por município",
+        subtitle = "Dados da CETESB, para o ano de 2018.") +
+  tema_mapa +
+  annotation_north_arrow(
+    location = "br",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm"),
+    pad_x = unit(0.1, "in"),
+    pad_y = unit(0.1, "in"),
+    style = north_arrow_fancy_orienteering
+  ) 
 
+```
+
+
+```{r}
+saneamento %>%
+  ggplot() +
+  geom_sf(aes(fill = atendimento_tratamento_porc)) +
+  scale_fill_viridis_c(direction = -1) +
+  theme_bw() +
+  labs(fill = "Porcentagem de \natendimento de \ntratamento de esgoto ",
+          title = "Porcentagem de atendimento de tratamento de esgoto,  \n considerando apenas o esgoto coletado, por município",
+        subtitle = "Dados da CETESB, para o ano de 2018.") +
+  tema_mapa +
+  annotation_north_arrow(
+    location = "br",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm"),
+    pad_x = unit(0.1, "in"),
+    pad_y = unit(0.1, "in"),
+    style = north_arrow_fancy_orienteering
+  ) 
+
+```
+
+
+```{r}
+saneamento %>% 
+   ggplot() +
+  geom_sf(aes(fill = porc_real_trat)) +
+  scale_fill_viridis_c(direction = -1) +
+  theme_bw() +
+  labs(fill = "Porcentagem de \natendimento de \ntratamento de esgoto ",
+          title = "Porcentagem de atendimento de tratamento de esgoto, por município",
+        subtitle = "Dados calculados a partir de dados da CETESB, para o ano de 2018.") +
+  tema_mapa +
+  annotation_north_arrow(
+    location = "br",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm"),
+    pad_x = unit(0.1, "in"),
+    pad_y = unit(0.1, "in"),
+    style = north_arrow_fancy_orienteering
+  ) 
+```
+```{r}
+
+a <- saneamento %>% ggplot() +
+  geom_boxplot(aes(x = nome_ugrhi, y = atendimento_coleta_porc)) + 
+  coord_flip() +
+  theme_bw()+
+  scale_y_continuous(limits=c(0, 100))
+
+b <- saneamento %>% ggplot() +
+  geom_boxplot(aes(x = nome_ugrhi, y = porc_real_trat)) + 
+  coord_flip()  +
+  theme_bw()+
+  scale_y_continuous(limits=c(0, 100))
+  
+
+
+a /
+  b
+```
 
 ## Recomendações para a base da CETESB
 
 - Adicionar uma explicação do que significa os dados de cada coluna.
 
-- Disponibilizar o CSV. Não disponibilizar PDFs digitalizados (como o para o ano de 2016).
+- Seria melhor disponibilizar também o arquivo `.CSV`. Não disponibilizar PDFs digitalizados (como o para o ano de 2016).
 
 - Seria útil adicionar, para os próximos relatórios, a coluna de código IBGE do município. 
 
 - Verificar a grafia do nome dos municípios (está inconsistente com a lista de municípios da Assembléia Legislativa do Estado de São Paulo^[https://www.al.sp.gov.br/documentacao/municipios-paulistas/]): São Luiz do Paraitinga, Biritiba Mirim, Itaoca.
 
+## Informações sobre a sessão
+
+```{r}
+sessioninfo::session_info()
+```
+
+
 ## Referências
 
 ```{r bib, include=FALSE}
-# create a bib file for the R packages used in this document
+# Cria o arquivo .bib com os pacotes usados neste documento
 knitr::write_bib(c(.packages(), 'base', 'rmarkdown', "geobr"), file = 'pacotes.bib')
 ```
